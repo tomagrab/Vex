@@ -1,21 +1,19 @@
 ﻿@inherits LayoutComponentBase
 
-<Layout>
-    <LayoutHeader Fixed>
-        <TopMenu />
-    </LayoutHeader>
-    <Layout Sider>
-        <LayoutSider>
-            <LayoutSiderContent>
-                <SideMenu />
-            </LayoutSiderContent>
-        </LayoutSider>
-        <Layout>
-            <LayoutContent>
-                <div class="p-4">
-                    @Body
-                </div>
-            </LayoutContent>
-        </Layout>
+<Layout Sider>
+    <LayoutSider>
+        <LayoutSiderContent>
+            <SideMenu />
+        </LayoutSiderContent>
+    </LayoutSider>
+    <Layout>
+        <LayoutHeader Fixed>
+            <Breadcrumbs />
+        </LayoutHeader>
+        <LayoutContent>
+            <div class="p-4">
+                @Body
+            </div>
+        </LayoutContent>
     </Layout>
 </Layout>

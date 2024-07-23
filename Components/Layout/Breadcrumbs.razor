@@ -1,0 +1,46 @@
+@inject NavigationManager NavigationManager
+
+<Breadcrumb Mode="BreadcrumbMode.Auto" class="mb-0 rounded-none">
+    <BreadcrumbItem>
+        <BreadcrumbLink To="/#Home">Dashboard</BreadcrumbLink>
+    </BreadcrumbItem>
+    @foreach (var segment in BreadcrumbSegments)
+    {
+        <BreadcrumbItem>
+            <BreadcrumbLink To="@segment.Link">@segment.Name</BreadcrumbLink>
+        </BreadcrumbItem>
+    }
+</Breadcrumb>
+
+@code {
+    private List<BreadcrumbSegment> BreadcrumbSegments { get; set; } = new List<BreadcrumbSegment>();
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        BuildBreadcrumbs();
+    }
+
+    private void BuildBreadcrumbs()
+    {
+        var uri = new Uri(NavigationManager.Uri);
+        var segments = uri.AbsolutePath.Split('/', StringSplitOptions.RemoveEmptyEntries);
+
+        var path = "/";
+        foreach (var segment in segments)
+        {
+            path = $"{path}{segment}/";
+            BreadcrumbSegments.Add(new BreadcrumbSegment
+            {
+                Name = segment,
+                Link = path
+            });
+        }
+    }
+
+    private class BreadcrumbSegment
+    {
+        public required string Name { get; set; }
+        public required string Link { get; set; }
+    }
+}

@@ -1,0 +1,37 @@
+@page "/Tickets"
+@rendermode InteractiveServer
+
+<PageTitle>Tickets | Vex</PageTitle>
+
+<Tabs SelectedTab="@selectedTab" SelectedTabChanged="@OnSelectedTabChanged">
+    <Items>
+        <Tab Name="Tickets">Tickets</Tab>
+        <Tab Name="Create">Create</Tab>
+        <Tab Name="messages">Messages</Tab>
+        <Tab Name="settings">Settings</Tab>
+    </Items>
+    <Content>
+        <TabPanel Name="Tickets">
+            Content for home.
+        </TabPanel>
+        <TabPanel Name="Create">
+            Content for profile.
+        </TabPanel>
+        <TabPanel Name="messages">
+            Content for messages.
+        </TabPanel>
+        <TabPanel Name="settings">
+            Content for settings.
+        </TabPanel>
+    </Content>
+</Tabs>
+@code{
+    string selectedTab = "Tickets";
+
+    private Task OnSelectedTabChanged( string name )
+    {
+        selectedTab = name;
+
+        return Task.CompletedTask;
+    }
+}

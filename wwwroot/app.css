@@ -27,3 +27,7 @@ h1:focus {
 .darker-border-checkbox.form-check-input {
     border-color: #929292;
 }
+
+.b-layout.b-layout-root > .b-layout-header.b-layout-header-fixed + .b-layout.b-layout-has-sider {
+    margin-top: 0px !important;
+}
