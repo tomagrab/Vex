@@ -41,4 +41,32 @@
             </BarItem>
         </BarStart>
     </BarMenu>
+    <CascadingAuthenticationState>
+        <AuthorizeView>
+            <Authorized>
+                <BarMenu>
+                    <BarEnd>
+                        <BarItem>
+                            <BarLink To="Account/Profile">
+                                <BarIcon IconName="IconName.User" />
+                                Profile
+                            </BarLink>
+                        </BarItem>
+                    </BarEnd>
+                </BarMenu>
+            </Authorized>
+            <NotAuthorized>
+                <BarMenu>
+                    <BarEnd>
+                        <BarItem>
+                            <BarLink To="Account/Login">
+                                <BarIcon IconName="IconName.Lock" />
+                                Login
+                            </BarLink>
+                        </BarItem>
+                    </BarEnd>
+                </BarMenu>
+            </NotAuthorized>
+        </AuthorizeView>
+    </CascadingAuthenticationState>
 </Bar>
