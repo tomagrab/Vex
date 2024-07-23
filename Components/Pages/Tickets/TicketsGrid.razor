@@ -1,0 +1,17 @@
+@page "/Tickets/Grid"
+@using Vex.Models
+@using Vex.Data
+@inject AppDbContext DbContext
+
+<PageTitle>Tickets Grid | Vex</PageTitle>
+
+<Datagrid TItem="TicketModel" Items="tickets" />
+
+@code {
+    private List<TicketModel> tickets = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        tickets = await TicketModel.GetAllAsync(DbContext);
+    }
+}

@@ -3,35 +3,36 @@
 
 <PageTitle>Tickets | Vex</PageTitle>
 
-<Tabs SelectedTab="@selectedTab" SelectedTabChanged="@OnSelectedTabChanged">
+<Tabs
+    SelectedTab="@selectedTab"
+    SelectedTabChanged="@OnSelectedTabChanged"
+    Justified="true"
+    RenderMode="TabsRenderMode.LazyLoad"
+>
     <Items>
-        <Tab Name="Tickets">Tickets</Tab>
         <Tab Name="Create">Create</Tab>
-        <Tab Name="messages">Messages</Tab>
-        <Tab Name="settings">Settings</Tab>
+        <Tab Name="Tickets">Tickets</Tab>
+        <Tab Name="Analytics">Analytics</Tab>
     </Items>
     <Content>
-        <TabPanel Name="Tickets">
-            Content for home.
-        </TabPanel>
         <TabPanel Name="Create">
-            Content for profile.
+            <TicketsCreate />
         </TabPanel>
-        <TabPanel Name="messages">
-            Content for messages.
+        <TabPanel Name="Tickets">
+            <TicketsGrid />
         </TabPanel>
-        <TabPanel Name="settings">
-            Content for settings.
+        <TabPanel Name="Analytics">
+            <TicketsAnalytics />
         </TabPanel>
     </Content>
 </Tabs>
+
 @code{
-    string selectedTab = "Tickets";
+    string selectedTab = "Create";
 
     private Task OnSelectedTabChanged( string name )
     {
         selectedTab = name;
-
         return Task.CompletedTask;
     }
 }

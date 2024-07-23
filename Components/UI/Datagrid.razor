@@ -1,0 +1,67 @@
+@using System.Dynamic
+@typeparam TItem
+
+<DataGrid
+    TItem="ExpandoObject"
+    Data="inMemoryData"
+    Responsive
+    ShowPager
+    ShowPageSizes
+    PageSize="5"
+    EditMode="DataGridEditMode.Inline"
+>
+    <DataGridColumns>
+        @foreach (var property in typeof(TItem).GetProperties())
+        {
+            if (property.PropertyType == typeof(DateTime))
+            {
+                <DataGridDateColumn Field="@property.Name" Caption="@property.Name" Editable DisplayFormat="{0:yyyy-MM-dd}" />
+            }
+            else if (property.PropertyType == typeof(bool))
+            {
+                <DataGridCheckColumn Field="@property.Name" Caption="@property.Name" Editable Filterable="false">
+                    <DisplayTemplate>
+                        @{
+                            var isChecked = (context as IDictionary<string, object>)[property.Name] as bool? ?? false;
+                        }
+                        <Check TValue="bool" Checked="@isChecked" Disabled ReadOnly />
+                    </DisplayTemplate>
+                </DataGridCheckColumn>
+            }
+            else if (property.PropertyType == typeof(int) || property.PropertyType == typeof(decimal) || property.PropertyType == typeof(double))
+            {
+                <DataGridNumericColumn Field="@property.Name" Caption="@property.Name" Editable />
+            }
+            else
+            {
+                <DataGridColumn Editable Field="@property.Name" Caption="@property.Name" />
+            }
+        }
+    </DataGridColumns>
+</DataGrid>
+
+@code {
+    [Parameter, EditorRequired] public List<TItem> Items { get; set; } = new();
+
+    private List<ExpandoObject> inMemoryData = new();
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        BuildInMemoryData();
+    }
+
+    private void BuildInMemoryData()
+    {
+        inMemoryData.Clear();
+        foreach (var item in Items)
+        {
+            IDictionary<string, object?> expando = new ExpandoObject();
+            foreach (var property in typeof(TItem).GetProperties())
+            {
+                expando.Add(property.Name, property.GetValue(item));
+            }
+            inMemoryData.Add((ExpandoObject)expando);
+        }
+    }
+}
