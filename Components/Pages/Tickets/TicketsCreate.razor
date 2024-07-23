@@ -1,13 +1,14 @@
 @page "/Tickets/Create"
+@rendermode InteractiveServer
 @using Microsoft.EntityFrameworkCore
 @using Vex.Models
 @using Vex.Data
 @using Blazorise
 @using Blazorise.Icons.FontAwesome
-@inject AppDbContext DbContext
+@inject AppDbContext AppDbContext
 @inject IMessageService MessageService
 
-<PageTitle>Create Ticket</PageTitle>
+<PageTitle>Create Ticket | Vex</PageTitle>
 
 <Row>
     <Column>
@@ -17,7 +18,7 @@
                     <Field ColumnSize="ColumnSize.IsHalf">
                         <FieldLabel>Contact</FieldLabel>
                         <FieldBody>
-                            <TextEdit @bind-Text="@ticketModel.Contact">
+                            <TextEdit @bind-Text="@ticketModel.Contact" Placeholder="Contact Name">
                                 <Feedback>
                                     <ValidationError />
                                 </Feedback>
@@ -29,19 +30,19 @@
                     <Field ColumnSize="ColumnSize.IsHalf">
                         <FieldLabel>Phone</FieldLabel>
                         <FieldBody>
-                            <TextEdit @bind-Text="@ticketModel.Phone">
+                            <InputMask @bind-Text="@ticketModel.Phone" Mask="(999) 999-9999" Placeholder="(999) 999-9999" >
                                 <Feedback>
                                     <ValidationError />
                                 </Feedback>
-                            </TextEdit>
+                            </InputMask>
                         </FieldBody>
                     </Field>
                 </Validation>
-                <Validation>
+                <Validation Validator="ValidateEmail">
                     <Field ColumnSize="ColumnSize.IsHalf">
                         <FieldLabel>Email</FieldLabel>
                         <FieldBody>
-                            <TextEdit @bind-Text="@ticketModel.Email" Role="TextRole.Email">
+                            <TextEdit @bind-Text="@ticketModel.Email" Role="TextRole.Email" Placeholder="example@example.com">
                                 <Feedback>
                                     <ValidationError />
                                 </Feedback>
@@ -235,17 +236,25 @@
 
     protected override async Task OnInitializedAsync()
     {
-        companies = await DbContext.Companies.ToListAsync();
-        branches = await DbContext.Branches.ToListAsync();
-        categories = await DbContext.Categories.ToListAsync();
-        subCategories = await DbContext.SubCategories.ToListAsync();
+        companies = await AppDbContext.Companies.ToListAsync();
+        branches = await AppDbContext.Branches.ToListAsync();
+        categories = await AppDbContext.Categories.ToListAsync();
+        subCategories = await AppDbContext.SubCategories.ToListAsync();
+    }
+
+    void ValidateEmail( ValidatorEventArgs e )
+    {
+        var email = Convert.ToString( e.Value );
+
+        e.Status = string.IsNullOrEmpty( email ) ? ValidationStatus.None :
+            email.Contains( "@" ) ? ValidationStatus.Success : ValidationStatus.Error;
     }
 
     private async Task OnSaveClicked()
     {
         if (await validationsRef.ValidateAll())
         {
-            await ticketModel.CreateAsync(DbContext);
+            await ticketModel.CreateAsync(AppDbContext);
             await MessageService.Info("Ticket created successfully.");
             ticketModel = new TicketModel(
                 contact: string.Empty,

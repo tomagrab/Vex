@@ -1,0 +1,17 @@
+@page "/Companies/Grid"
+@using Vex.Models
+@using Vex.Data
+@inject AppDbContext AppDbContext
+
+<PageTitle>Company Grid | Vex</PageTitle>
+
+<Datagrid TItem="CompanyModel" Items="companies" />
+
+@code {
+    private List<CompanyModel> companies = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        companies = await CompanyModel.GetAllAsync(AppDbContext);
+    }
+}

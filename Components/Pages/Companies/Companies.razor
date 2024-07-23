@@ -1,0 +1,38 @@
+@page "/Companies"
+@rendermode InteractiveServer
+
+<PageTitle>Companies | Vex</PageTitle>
+
+<Tabs
+    SelectedTab="@selectedTab"
+    SelectedTabChanged="@OnSelectedTabChanged"
+    Justified="true"
+    RenderMode="TabsRenderMode.LazyLoad"
+>
+    <Items>
+        <Tab Name="Create">Create</Tab>
+        <Tab Name="Companies">Companies</Tab>
+        <Tab Name="Analytics">Analytics</Tab>
+    </Items>
+    <Content>
+        <TabPanel Name="Create">
+            <CompaniesCreate />
+        </TabPanel>
+        <TabPanel Name="Companies">
+            <CompaniesGrid />
+        </TabPanel>
+        <TabPanel Name="Analytics">
+            <CompaniesAnalytics />
+        </TabPanel>
+    </Content>
+</Tabs>
+
+@code{
+    string selectedTab = "Create";
+
+    private Task OnSelectedTabChanged( string name )
+    {
+        selectedTab = name;
+        return Task.CompletedTask;
+    }
+}

@@ -2,9 +2,9 @@
 @using Vex.Models
 @using Vex.Data
 @using Blazorise.Charts
-@inject AppDbContext DbContext
+@inject AppDbContext AppDbContext
 
-<PageTitle>Tickets Analytics | Vex</PageTitle>
+<PageTitle>Ticket Analytics | Vex</PageTitle>
 
 <h3>Tickets Created Over Time</h3>
 <LineChart @ref="lineChart" TItem="double" />
@@ -16,7 +16,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var tickets = await TicketModel.GetAllAsync(DbContext);
+        var tickets = await TicketModel.GetAllAsync(AppDbContext);
 
         var ticketCountsByDate = tickets
             .GroupBy(t => t.CreatedAt.Date)

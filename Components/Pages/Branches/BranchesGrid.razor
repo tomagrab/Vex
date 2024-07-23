@@ -1,0 +1,17 @@
+@page "/Branches/Grid"
+@using Vex.Models
+@using Vex.Data
+@inject AppDbContext AppDbContext
+
+<PageTitle>Branch Grid | Vex</PageTitle>
+
+<Datagrid TItem="BranchModel" Items="branches" />
+
+@code {
+    private List<BranchModel> branches = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        branches = await BranchModel.GetAllAsync(AppDbContext);
+    }
+}

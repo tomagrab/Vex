@@ -1,9 +1,9 @@
 @page "/Tickets/Grid"
 @using Vex.Models
 @using Vex.Data
-@inject AppDbContext DbContext
+@inject AppDbContext AppDbContext
 
-<PageTitle>Tickets Grid | Vex</PageTitle>
+<PageTitle>Ticket Grid | Vex</PageTitle>
 
 <Datagrid TItem="TicketModel" Items="tickets" />
 
@@ -12,6 +12,6 @@
 
     protected override async Task OnInitializedAsync()
     {
-        tickets = await TicketModel.GetAllAsync(DbContext);
+        tickets = await TicketModel.GetAllAsync(AppDbContext);
     }
 }
