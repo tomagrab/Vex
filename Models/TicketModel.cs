@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
 using Vex.Data;
 
@@ -6,20 +7,51 @@ namespace Vex.Models
     public class TicketModel
     {
         public Guid Id { get; set; }
-        public required string Contact { get; set; }
-        public required string Phone { get; set; }
-        public required string Email { get; set; }
-        public required CompanyModel Company { get; set; }
-        public required BranchModel Branch { get; set; }
-        public required string Description { get; set; }
-        public required CategoryModel Category { get; set; }
-        public required SubCategoryModel SubCategory { get; set; }
-        public required string Status { get; set; }
-        public required string Priority { get; set; }
-        public required string AssignedTo { get; set; }
-        public required string CreatedBy { get; set; }
-        public required string UpdatedBy { get; set; }
+
+        [Required]
+        public string Contact { get; set; } = string.Empty;
+
+        [Required]
+        [Phone]
+        public string Phone { get; set; } = string.Empty;
+
+        [EmailAddress]
+        public string? Email { get; set; }
+
+        [Required]
+        public CompanyModel Company { get; set; } = new CompanyModel { Name = string.Empty };
+
+        [Required]
+        public BranchModel Branch { get; set; } = new BranchModel { Name = string.Empty, Company = new CompanyModel { Name = string.Empty } };
+
+        [Required]
+        public string Description { get; set; } = string.Empty;
+
+        [Required]
+        public CategoryModel Category { get; set; } = new CategoryModel { Name = string.Empty };
+
+        [Required]
+        public SubCategoryModel SubCategory { get; set; } = new SubCategoryModel { Name = string.Empty, Category = new CategoryModel { Name = string.Empty } };
+
+        [Required]
+        public string Status { get; set; } = string.Empty;
+
+        [Required]
+        public string Priority { get; set; } = string.Empty;
+
+        [Required]
+        public string AssignedTo { get; set; } = string.Empty;
+
+        [Required]
+        public string CreatedBy { get; set; } = string.Empty;
+
+        [Required]
+        public string UpdatedBy { get; set; } = string.Empty;
+
+        [Required]
         public DateTime CreatedAt { get; set; }
+
+        [Required]
         public DateTime UpdatedAt { get; set; }
 
         public TicketModel() {}

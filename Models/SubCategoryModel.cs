@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
 using Vex.Data;
 
@@ -6,7 +7,11 @@ namespace Vex.Models
     public class SubCategoryModel
     {
         public Guid Id { get; set; }
+
+        [Required]
         public required string Name { get; set; }
+
+        [Required]
         public required CategoryModel Category { get; set; }
 
         public SubCategoryModel() {}

@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
 using Vex.Data;
 
@@ -6,6 +7,8 @@ namespace Vex.Models
     public class CompanyModel
     {
         public Guid Id { get; set; }
+
+        [Required]
         public required string Name { get; set; }
 
         public CompanyModel() {}

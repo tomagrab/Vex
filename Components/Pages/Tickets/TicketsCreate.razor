@@ -1,0 +1,270 @@
+@page "/Tickets/Create"
+@using Microsoft.EntityFrameworkCore
+@using Vex.Models
+@using Vex.Data
+@using Blazorise
+@using Blazorise.Icons.FontAwesome
+@inject AppDbContext DbContext
+@inject IMessageService MessageService
+
+<PageTitle>Create Ticket</PageTitle>
+
+<Row>
+    <Column>
+        <Validations @ref="validationsRef" Mode="ValidationMode.Manual" Model="@ticketModel" ValidateOnLoad="false">
+            <Fields>
+                <Validation>
+                    <Field ColumnSize="ColumnSize.IsHalf">
+                        <FieldLabel>Contact</FieldLabel>
+                        <FieldBody>
+                            <TextEdit @bind-Text="@ticketModel.Contact">
+                                <Feedback>
+                                    <ValidationError />
+                                </Feedback>
+                            </TextEdit>
+                        </FieldBody>
+                    </Field>
+                </Validation>
+                <Validation>
+                    <Field ColumnSize="ColumnSize.IsHalf">
+                        <FieldLabel>Phone</FieldLabel>
+                        <FieldBody>
+                            <TextEdit @bind-Text="@ticketModel.Phone">
+                                <Feedback>
+                                    <ValidationError />
+                                </Feedback>
+                            </TextEdit>
+                        </FieldBody>
+                    </Field>
+                </Validation>
+                <Validation>
+                    <Field ColumnSize="ColumnSize.IsHalf">
+                        <FieldLabel>Email</FieldLabel>
+                        <FieldBody>
+                            <TextEdit @bind-Text="@ticketModel.Email" Role="TextRole.Email">
+                                <Feedback>
+                                    <ValidationError />
+                                </Feedback>
+                            </TextEdit>
+                        </FieldBody>
+                    </Field>
+                </Validation>
+                <Validation>
+                    <Field ColumnSize="ColumnSize.IsHalf">
+                        <FieldLabel>Company</FieldLabel>
+                        <FieldBody>
+                            <Select @bind-SelectedValue="@ticketModel.Company">
+                                <ChildContent>
+                                    <SelectItem TValue="CompanyModel"></SelectItem>
+                                    @foreach (var company in companies)
+                                    {
+                                        <SelectItem TValue="CompanyModel" Value="@company">@company.Name</SelectItem>
+                                    }
+                                </ChildContent>
+                                <Feedback>
+                                    <ValidationError />
+                                </Feedback>
+                            </Select>
+                        </FieldBody>
+                    </Field>
+                </Validation>
+                <Validation>
+                    <Field ColumnSize="ColumnSize.IsHalf">
+                        <FieldLabel>Branch</FieldLabel>
+                        <FieldBody>
+                            <Select @bind-SelectedValue="@ticketModel.Branch">
+                                <ChildContent>
+                                    <SelectItem TValue="BranchModel"></SelectItem>
+                                    @foreach (var branch in branches)
+                                    {
+                                        <SelectItem TValue="BranchModel" Value="@branch">@branch.Name</SelectItem>
+                                    }
+                                </ChildContent>
+                                <Feedback>
+                                    <ValidationError />
+                                </Feedback>
+                            </Select>
+                        </FieldBody>
+                    </Field>
+                </Validation>
+                <Validation>
+                    <Field ColumnSize="ColumnSize.IsHalf">
+                        <FieldLabel>Description</FieldLabel>
+                        <FieldBody>
+                            <TextEdit @bind-Text="@ticketModel.Description">
+                                <Feedback>
+                                    <ValidationError />
+                                </Feedback>
+                            </TextEdit>
+                        </FieldBody>
+                    </Field>
+                </Validation>
+                <Validation>
+                    <Field ColumnSize="ColumnSize.IsHalf">
+                        <FieldLabel>Category</FieldLabel>
+                        <FieldBody>
+                            <Select @bind-SelectedValue="@ticketModel.Category">
+                                <ChildContent>
+                                    <SelectItem TValue="CategoryModel"></SelectItem>
+                                    @foreach (var category in categories)
+                                    {
+                                        <SelectItem TValue="CategoryModel" Value="@category">@category.Name</SelectItem>
+                                    }
+                                </ChildContent>
+                                <Feedback>
+                                    <ValidationError />
+                                </Feedback>
+                            </Select>
+                        </FieldBody>
+                    </Field>
+                </Validation>
+                <Validation>
+                    <Field ColumnSize="ColumnSize.IsHalf">
+                        <FieldLabel>SubCategory</FieldLabel>
+                        <FieldBody>
+                            <Select @bind-SelectedValue="@ticketModel.SubCategory">
+                                <ChildContent>
+                                    <SelectItem TValue="SubCategoryModel"></SelectItem>
+                                    @foreach (var subCategory in subCategories)
+                                    {
+                                        <SelectItem TValue="SubCategoryModel" Value="@subCategory">@subCategory.Name</SelectItem>
+                                    }
+                                </ChildContent>
+                                <Feedback>
+                                    <ValidationError />
+                                </Feedback>
+                            </Select>
+                        </FieldBody>
+                    </Field>
+                </Validation>
+                <Validation>
+                    <Field ColumnSize="ColumnSize.IsHalf">
+                        <FieldLabel>Status</FieldLabel>
+                        <FieldBody>
+                            <Select @bind-SelectedValue="@ticketModel.Status">
+                                <ChildContent>
+                                    @{
+                                        string Open = "Open";
+                                        string Pending = "Pending";
+                                        string Closed = "Closed";
+                                    }
+                                    <SelectItem TValue="string" Value="@Open">@Open</SelectItem>
+                                    <SelectItem TValue="string" Value="@Pending">@Pending</SelectItem>
+                                    <SelectItem TValue="string" Value="@Closed">@Closed</SelectItem>
+                                </ChildContent>
+                                <Feedback>
+                                    <ValidationError />
+                                </Feedback>
+                            </Select>
+                        </FieldBody>
+                    </Field>
+                </Validation>
+                <Validation>
+                    <Field ColumnSize="ColumnSize.IsHalf">
+                        <FieldLabel>Priority</FieldLabel>
+                        <FieldBody>
+                            <Select @bind-SelectedValue="@ticketModel.Priority">
+                                <ChildContent>
+                                    @{
+                                        string Low = "Low";
+                                        string Medium = "Medium";
+                                        string High = "High";
+                                    }
+                                    <SelectItem TValue="string" Value="@Low">@Low</SelectItem>
+                                    <SelectItem TValue="string" Value="@Medium">@Medium</SelectItem>
+                                    <SelectItem TValue="string" Value="@High">@High</SelectItem>
+                                </ChildContent>
+                                <Feedback>
+                                    <ValidationError />
+                                </Feedback>
+                            </Select>
+                        </FieldBody>
+                    </Field>
+                </Validation>
+                <Validation>
+                    <Field ColumnSize="ColumnSize.IsHalf">
+                        <FieldLabel>Assigned To</FieldLabel>
+                        <FieldBody>
+                            <TextEdit @bind-Text="@ticketModel.AssignedTo">
+                                <Feedback>
+                                    <ValidationError />
+                                </Feedback>
+                            </TextEdit>
+                        </FieldBody>
+                    </Field>
+                </Validation>
+                <Validation>
+                    <Field ColumnSize="ColumnSize.IsHalf">
+                        <FieldLabel>Created By</FieldLabel>
+                        <FieldBody>
+                            <TextEdit @bind-Text="@ticketModel.CreatedBy">
+                                <Feedback>
+                                    <ValidationError />
+                                </Feedback>
+                            </TextEdit>
+                        </FieldBody>
+                    </Field>
+                </Validation>
+                <Validation>
+                    <Field ColumnSize="ColumnSize.IsHalf">
+                        <FieldLabel>Updated By</FieldLabel>
+                        <FieldBody>
+                            <TextEdit @bind-Text="@ticketModel.UpdatedBy">
+                                <Feedback>
+                                    <ValidationError />
+                                </Feedback>
+                            </TextEdit>
+                        </FieldBody>
+                    </Field>
+                </Validation>
+            </Fields>
+        </Validations>
+        <Button Color="Color.Primary" Clicked="@OnSaveClicked">
+            Validate and Submit
+        </Button>
+    </Column>
+</Row>
+
+@code {
+    private Validations validationsRef = new();
+    private TicketModel ticketModel = new TicketModel();
+    private List<CompanyModel> companies = new();
+    private List<BranchModel> branches = new();
+    private List<CategoryModel> categories = new();
+    private List<SubCategoryModel> subCategories = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        companies = await DbContext.Companies.ToListAsync();
+        branches = await DbContext.Branches.ToListAsync();
+        categories = await DbContext.Categories.ToListAsync();
+        subCategories = await DbContext.SubCategories.ToListAsync();
+    }
+
+    private async Task OnSaveClicked()
+    {
+        if (await validationsRef.ValidateAll())
+        {
+            await ticketModel.CreateAsync(DbContext);
+            await MessageService.Info("Ticket created successfully.");
+            ticketModel = new TicketModel(
+                contact: string.Empty,
+                phone: string.Empty,
+                email: string.Empty,
+                company: new CompanyModel { Name = string.Empty },
+                branch: new BranchModel { Name = string.Empty, Company = new CompanyModel { Name = string.Empty } },
+                description: string.Empty,
+                category: new CategoryModel { Name = string.Empty },
+                subCategory: new SubCategoryModel { Name = string.Empty, Category = new CategoryModel { Name = string.Empty } },
+                assignedTo: string.Empty,
+                createdBy: string.Empty,
+                updatedBy: string.Empty
+            );
+            await validationsRef.ClearAll();
+        }
+        else
+        {
+            await MessageService.Error("Please fix the errors in the form.");
+        }
+    }
+}

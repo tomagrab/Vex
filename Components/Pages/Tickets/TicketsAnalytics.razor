@@ -1,0 +1,56 @@
+@page "/Tickets/Analytics"
+@using Vex.Models
+@using Vex.Data
+@using Blazorise.Charts
+@inject AppDbContext DbContext
+
+<PageTitle>Tickets Analytics | Vex</PageTitle>
+
+<h3>Tickets Created Over Time</h3>
+<LineChart @ref="lineChart" TItem="double" />
+
+@code {
+    LineChart<double> lineChart = new();
+    List<string> labels = new();
+    List<double> data = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var tickets = await TicketModel.GetAllAsync(DbContext);
+
+        var ticketCountsByDate = tickets
+            .GroupBy(t => t.CreatedAt.Date)
+            .Select(g => new { Date = g.Key, Count = g.Count() })
+            .OrderBy(g => g.Date)
+            .ToList();
+
+        foreach (var item in ticketCountsByDate)
+        {
+            labels.Add(item.Date.ToString("yyyy-MM-dd"));
+            data.Add(item.Count);
+        }
+
+        await HandleRedraw();
+    }
+
+    async Task HandleRedraw()
+    {
+        await lineChart.Clear();
+
+        await lineChart.AddLabelsDatasetsAndUpdate(labels, GetLineChartDataset());
+    }
+
+    LineChartDataset<double> GetLineChartDataset()
+    {
+        return new LineChartDataset<double>
+        {
+            Label = "Number of Tickets",
+            Data = data,
+            BackgroundColor = ChartColor.FromRgba(75, 192, 192, 0.2f),
+            BorderColor = ChartColor.FromRgba(75, 192, 192, 1f),
+            Fill = true,
+            PointRadius = 3,
+            CubicInterpolationMode = "monotone",
+        };
+    }
+}

@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
 using Vex.Data;
 
@@ -6,7 +7,11 @@ namespace Vex.Models
     public class BranchModel
     {
         public Guid Id { get; set; }
+
+        [Required]
         public required string Name { get; set; }
+
+        [Required]
         public required CompanyModel Company { get; set; }
 
         public BranchModel() {}
