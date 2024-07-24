@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Auth0.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Vex.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,7 +34,7 @@ if (string.IsNullOrEmpty(Auth0ClientId))
 
 // Add services to the container.
 builder.Services
-    .AddDbContext<AppDbContext>(options => options.UseNpgsql(connectionString))
+    .AddDbContextFactory<AppDbContext>(options => options.UseNpgsql(connectionString))
     .AddBlazorise()
     .AddTailwindProviders()
     .AddFontAwesomeIcons()
@@ -46,7 +47,7 @@ builder.Services.AddAuth0WebAppAuthentication(options =>
     options.ClientId = Auth0ClientId;
 });
 
-builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<IUserService, UserService>();
 
 var app = builder.Build();
 
