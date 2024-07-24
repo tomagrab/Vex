@@ -33,6 +33,13 @@ if (string.IsNullOrEmpty(Auth0ClientId))
     throw new ArgumentNullException("VEX_AUTH0_CLIENT_ID environment variable is not set.");
 }
 
+var Auth0ClientSecret = Environment.GetEnvironmentVariable("VEX_AUTH0_CLIENT_SECRET", EnvironmentVariableTarget.Machine);
+
+if (string.IsNullOrEmpty(Auth0ClientSecret))
+{
+    throw new ArgumentNullException("VEX_AUTH0_CLIENT_SECRET environment variable is not set.");
+}
+
 // Add services to the container.
 builder.Services
     .AddDbContextFactory<AppDbContext>(options => options.UseNpgsql(connectionString))
@@ -54,6 +61,10 @@ builder.Services.AddAuth0WebAppAuthentication(options =>
 });
 
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddHttpClient<IAuth0Service, Auth0Service>(client =>
+{
+    return new Auth0Service(client, Auth0ClientId, Auth0ClientSecret, Auth0Domain);
+});
 
 var app = builder.Build();
 

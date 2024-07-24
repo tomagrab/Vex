@@ -172,31 +172,7 @@
                     <Field ColumnSize="ColumnSize.IsHalf">
                         <FieldLabel>Assigned To</FieldLabel>
                         <FieldBody>
-                            <TextEdit @bind-Text="@ticketModel.AssignedTo">
-                                <Feedback>
-                                    <ValidationError />
-                                </Feedback>
-                            </TextEdit>
-                        </FieldBody>
-                    </Field>
-                </Validation>
-                <Validation>
-                    <Field ColumnSize="ColumnSize.IsHalf">
-                        <FieldLabel>Created By</FieldLabel>
-                        <FieldBody>
-                            <TextEdit @bind-Text="@ticketModel.CreatedBy">
-                                <Feedback>
-                                    <ValidationError />
-                                </Feedback>
-                            </TextEdit>
-                        </FieldBody>
-                    </Field>
-                </Validation>
-                <Validation>
-                    <Field ColumnSize="ColumnSize.IsHalf">
-                        <FieldLabel>Updated By</FieldLabel>
-                        <FieldBody>
-                            <TextEdit @bind-Text="@ticketModel.UpdatedBy">
+                            <TextEdit Text="@userModel?.Name" ReadOnly="true">
                                 <Feedback>
                                     <ValidationError />
                                 </Feedback>
@@ -254,6 +230,13 @@
     {
         userModel = await UserService.GetUserModelAsync();
         await LoadDataAsync();
+
+        if (userModel != null)
+        {
+            ticketModel.CreatedBy = userModel.Id;
+            ticketModel.UpdatedBy = userModel.Id;
+            ticketModel.AssignedTo = userModel.Id;
+        }
     }
 
     private async Task LoadDataAsync()
@@ -262,7 +245,7 @@
         companies = await context.Companies.ToListAsync();
         branches = await context.Branches.ToListAsync();
         categories = await context.Categories.ToListAsync();
-        subCategories = new List<SubCategoryModel>();
+        subCategories = await SubCategoryModel.GetByCategoryAsync(context, categories.FirstOrDefault()?.Id ?? Guid.Empty);
     }
 
     private async Task OnCategoryChanged(Guid categoryId)
@@ -300,8 +283,7 @@
         await OnDescriptionChanged();
         if (await validationsRef.ValidateAll())
         {
-            ticketModel.CreatedBy = userModel?.Name;
-            ticketModel.UpdatedBy = userModel?.Name;
+            ticketModel.UpdatedBy = userModel?.Id;
 
             await using var context = DbContextFactory.CreateDbContext();
             context.Tickets.Add(ticketModel);
@@ -317,9 +299,9 @@
                 description: string.Empty,
                 category: new CategoryModel { Name = string.Empty },
                 subCategory: new SubCategoryModel { Name = string.Empty, Category = new CategoryModel { Name = string.Empty } },
-                assignedTo: userModel?.Name,
-                createdBy: userModel?.Name,
-                updatedBy: userModel?.Name
+                assignedTo: userModel?.Id,
+                createdBy: userModel?.Id,
+                updatedBy: userModel?.Id
             );
             await validationsRef.ClearAll();
         }

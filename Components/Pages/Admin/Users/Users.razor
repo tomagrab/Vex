@@ -1,0 +1,39 @@
+@page "/Admin/Users"
+@attribute [Authorize(Roles = "Administrator")]
+@rendermode InteractiveServer
+
+<PageTitle>Users | Vex</PageTitle>
+
+<Tabs
+    SelectedTab="@selectedTab"
+    SelectedTabChanged="@OnSelectedTabChanged"
+    Justified="true"
+    RenderMode="TabsRenderMode.LazyLoad"
+>
+    <Items>
+        <Tab Name="Create">Create</Tab>
+        <Tab Name="Users">Users</Tab>
+        <Tab Name="Analytics">Analytics</Tab>
+    </Items>
+    <Content>
+        <TabPanel Name="Create">
+            <UsersCreate />
+        </TabPanel>
+        <TabPanel Name="Users">
+            <UsersGrid />
+        </TabPanel>
+        <TabPanel Name="Analytics">
+            <UsersAnalytics />
+        </TabPanel>
+    </Content>
+</Tabs>
+
+@code{
+    string selectedTab = "Create";
+
+    private Task OnSelectedTabChanged( string name )
+    {
+        selectedTab = name;
+        return Task.CompletedTask;
+    }
+}

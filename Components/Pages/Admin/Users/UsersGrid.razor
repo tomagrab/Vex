@@ -1,0 +1,19 @@
+@page "/Admin/Users/Grid"
+@attribute [Authorize(Roles = "Administrator")]
+@using Vex.Models
+@using Vex.Data
+@inject AppDbContext AppDbContext
+@inject Auth0Service Auth0Service
+
+<PageTitle>User Grid | Vex</PageTitle>
+
+
+
+@code {
+
+    protected override async Task OnInitializedAsync()
+    {
+        users = await Auth0Service.GetUsersAsync();
+        Console.WriteLine(users);
+    }
+}
