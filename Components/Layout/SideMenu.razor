@@ -1,4 +1,5 @@
 @rendermode InteractiveServer
+@inject IUserService UserService
 
 <Bar Mode="BarMode.VerticalInline"
      CollapseMode="BarCollapseMode.Small"
@@ -49,7 +50,7 @@
                         <BarItem>
                             <BarLink To="Account">
                                 <BarIcon IconName="IconName.UserCircle" />
-                                Account
+                                @userName
                             </BarLink>
                         </BarItem>
                         <BarItem>
@@ -74,3 +75,11 @@
         </CascadingAuthenticationState>
     </BarMenu>
 </Bar>
+
+@code {
+    private string userName = string.Empty;
+    protected override async Task OnInitializedAsync()
+    {
+        userName = await UserService.GetUserNameAsync() ?? "Account";
+    }
+}
