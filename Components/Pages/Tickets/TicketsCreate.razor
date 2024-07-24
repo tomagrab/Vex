@@ -245,13 +245,14 @@
     private List<BranchModel> branches = new();
     private List<CategoryModel> categories = new();
     private List<SubCategoryModel> subCategories = new();
-    private string userName = string.Empty;
     private Guid selectedCategoryId;
     private RichTextEdit richTextEditRef;
 
+    private UserModel? userModel;
+    
     protected override async Task OnInitializedAsync()
     {
-        userName = await UserService.GetUserNameAsync();
+        userModel = await UserService.GetUserModelAsync();
         await LoadDataAsync();
     }
 
@@ -299,8 +300,8 @@
         await OnDescriptionChanged();
         if (await validationsRef.ValidateAll())
         {
-            ticketModel.CreatedBy = userName;
-            ticketModel.UpdatedBy = userName;
+            ticketModel.CreatedBy = userModel?.Name;
+            ticketModel.UpdatedBy = userModel?.Name;
 
             await using var context = DbContextFactory.CreateDbContext();
             context.Tickets.Add(ticketModel);
@@ -316,9 +317,9 @@
                 description: string.Empty,
                 category: new CategoryModel { Name = string.Empty },
                 subCategory: new SubCategoryModel { Name = string.Empty, Category = new CategoryModel { Name = string.Empty } },
-                assignedTo: userName,
-                createdBy: userName,
-                updatedBy: userName
+                assignedTo: userModel?.Name,
+                createdBy: userModel?.Name,
+                updatedBy: userModel?.Name
             );
             await validationsRef.ClearAll();
         }

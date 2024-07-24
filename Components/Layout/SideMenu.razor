@@ -50,7 +50,7 @@
                         <BarItem>
                             <BarLink To="Account">
                                 <BarIcon IconName="IconName.UserCircle" />
-                                @userName
+                                @userModel?.Name
                             </BarLink>
                         </BarItem>
                         <BarItem>
@@ -77,9 +77,9 @@
 </Bar>
 
 @code {
-    private string userName = string.Empty;
+    private UserModel? userModel;
     protected override async Task OnInitializedAsync()
     {
-        userName = await UserService.GetUserNameAsync() ?? "Account";
+        userModel = await UserService.GetUserModelAsync();
     }
 }

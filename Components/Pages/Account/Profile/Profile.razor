@@ -7,29 +7,24 @@
 <Card>
     <CardHeader class="flex justify-between items-center">
         <CardTitle class="flex flex-col">
-            @userName
-            <small>@userRole</small>
+            @userModel?.Id
+            <div class="flex gap-2 items-center">
+                @userModel?.Name
+                <Badge Color="Color.Primary">
+                    <small class="text-sm">@userModel?.Role</small>
+                </Badge>
+            </div>
+            <small class="text-sm">@userModel?.Email</small>
         </CardTitle>
-        <Image Source="@userPicture" Text="@userName" />
+        <Image Source="@userModel?.Picture" Text="@userModel?.Name" />
     </CardHeader>
-    <CardBody>
-        <p class="text-white">
-            <strong>Email:</strong> @userEmail
-        </p>
-    </CardBody>
 </Card>
 
 @code {
-    private string userName = string.Empty;
-    private string userPicture = string.Empty;
-    private string userRole = string.Empty;
-    private string userEmail = string.Empty;
+    private UserModel? userModel;
 
     protected override async Task OnInitializedAsync()
     {
-        userName = await UserService.GetUserNameAsync() ?? "User";
-        userRole = await UserService.GetUserRoleAsync() ?? "No role set";
-        userPicture = await UserService.GetUserPictureAsync() ?? "default.png";
-        userEmail = await UserService.GetUserEmailAsync() ?? "No email set";
+        userModel = await UserService.GetUserModelAsync();
     }
 }

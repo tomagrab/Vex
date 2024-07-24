@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Components.Authorization;
 using System.Security.Claims;
+using System.Text.Json;
+using Vex.Models;
 
 namespace Vex.Services
 {
@@ -7,6 +9,7 @@ namespace Vex.Services
     {
         private readonly AuthenticationStateProvider _authenticationStateProvider;
         private ClaimsPrincipal? _cachedUser;
+        private UserModel? _cachedUserModel;
 
         public UserService(AuthenticationStateProvider authenticationStateProvider)
         {
@@ -23,28 +26,24 @@ namespace Vex.Services
             return _cachedUser;
         }
 
-        public async Task<string?> GetUserNameAsync()
+        public async Task<UserModel?> GetUserModelAsync()
         {
-            var user = await GetUserAsync();
-            return user?.Identity?.Name;
-        }
-
-        public async Task<string?> GetUserRoleAsync()
-        {
-            var user = await GetUserAsync();
-            return user?.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
-        }
-
-        public async Task<string?> GetUserPictureAsync()
-        {
-            var user = await GetUserAsync();
-            return user?.FindFirst("picture")?.Value;
-        }
-
-        public async Task<string?> GetUserEmailAsync()
-        {
-            var user = await GetUserAsync();
-            return user?.FindFirst("emailClaim")?.Value;
+            if (_cachedUserModel == null)
+            {
+                var user = await GetUserAsync();
+                if (user != null && user.Identity != null && user.Identity.IsAuthenticated)
+                {
+                    _cachedUserModel = new UserModel
+                    {
+                        Id = user.FindFirst("user_id")?.Value,
+                        Name = user.Identity.Name,
+                        Role = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value,
+                        Picture = user.FindFirst("picture")?.Value,
+                        Email = user.FindFirst(ClaimTypes.Email)?.Value ?? user?.FindFirst("emailClaim")?.Value
+                    };
+                }
+            }
+            return _cachedUserModel;
         }
     }
 }
