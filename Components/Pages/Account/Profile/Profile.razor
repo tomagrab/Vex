@@ -27,7 +27,7 @@
     {
         userModel = await UserService.GetUserModelAsync();
 
-        var user = await Auth0Service.GetUserInfoAsync();
-        Console.WriteLine(user);
+        var userInfo = await Auth0Service.GetUserInfoAsync();
+        Console.WriteLine(userInfo);
     }
 }

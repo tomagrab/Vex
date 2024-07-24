@@ -41,6 +41,30 @@ namespace Vex.Services
             return tokenResponse.AccessToken;
         }
 
+        public async Task<string> GetAuth0AccessTokenAsync()
+        {
+            var request = new HttpRequestMessage(HttpMethod.Post, $"https://{_domain}/oauth/token");
+
+            var content = new StringContent($"grant_type=client_credentials&client_id={_clientId}&client_secret={_clientSecret}&audience=https://{_domain}/api/v2/", Encoding.UTF8, "application/x-www-form-urlencoded");
+
+            request.Content = content;
+
+            var response = await _httpClient.SendAsync(request);
+            response.EnsureSuccessStatusCode();
+
+            var responseBody = await response.Content.ReadAsStringAsync();
+            var tokenResponse = JsonSerializer.Deserialize<Auth0TokenResponse>(responseBody);
+
+            if (tokenResponse == null)
+            {
+                throw new Exception("Failed to deserialize token response.");
+            }
+
+            Console.WriteLine($"Access token: {tokenResponse.AccessToken}");
+
+            return tokenResponse.AccessToken;
+        }
+
         public async Task<string> GetUsersAsync()
         {
             var token = await GetAuth0TokenAsync();
@@ -73,13 +97,21 @@ namespace Vex.Services
 
         public async Task<string> GetUserInfoAsync()
         {
-            var token = await GetAuth0TokenAsync();
+            var accessToken = await GetAuth0AccessTokenAsync();
 
             var request = new HttpRequestMessage(HttpMethod.Get, $"https://{_domain}/userinfo");
 
-            request.Headers.Add("Accept", "application/json");
-            request.Headers.Add("Authorization", $"Bearer {token}");
+            Console.WriteLine($"Access token: {accessToken}");
+            Console.WriteLine($"Domain: {_domain}");
+            Console.WriteLine($"Client ID: {_clientId}");
+            Console.WriteLine($"Client Secret: {_clientSecret}");
+            Console.WriteLine($"Request URI: {request.RequestUri}");
 
+
+            request.Headers.Add("Accept", "application/json");
+            request.Headers.Add("Authorization", $"Bearer {accessToken}");
+
+            Console.WriteLine($"Request: {request}");
             var response = await _httpClient.SendAsync(request);
             response.EnsureSuccessStatusCode();
 

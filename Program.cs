@@ -58,6 +58,7 @@ builder.Services.AddAuth0WebAppAuthentication(options =>
 {
     options.Domain = Auth0Domain;
     options.ClientId = Auth0ClientId;
+    options.Scope = "openid profile email";
 });
 
 builder.Services.AddScoped<IUserService, UserService>();
