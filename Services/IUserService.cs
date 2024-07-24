@@ -7,6 +7,8 @@ namespace Vex.Services
     {
         Task<ClaimsPrincipal?> GetUserAsync();
         Task<string?> GetUserNameAsync();
+        Task<string?> GetUserRoleAsync();
         Task<string?> GetUserPictureAsync();
+        Task<string?> GetUserEmailAsync();
     }
 }

@@ -29,10 +29,22 @@ namespace Vex.Services
             return user?.Identity?.Name;
         }
 
+        public async Task<string?> GetUserRoleAsync()
+        {
+            var user = await GetUserAsync();
+            return user?.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
+        }
+
         public async Task<string?> GetUserPictureAsync()
         {
             var user = await GetUserAsync();
             return user?.FindFirst("picture")?.Value;
+        }
+
+        public async Task<string?> GetUserEmailAsync()
+        {
+            var user = await GetUserAsync();
+            return user?.FindFirst("emailClaim")?.Value;
         }
     }
 }

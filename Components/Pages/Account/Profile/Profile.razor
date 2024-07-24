@@ -5,19 +5,31 @@
 <PageTitle>Profile | Vex</PageTitle>
 
 <Card>
-    <CardHeader>
-        <CardTitle>Welcome, @userName</CardTitle>
+    <CardHeader class="flex justify-between items-center">
+        <CardTitle class="flex flex-col">
+            @userName
+            <small>@userRole</small>
+        </CardTitle>
         <Image Source="@userPicture" Text="@userName" />
     </CardHeader>
+    <CardBody>
+        <p class="text-white">
+            <strong>Email:</strong> @userEmail
+        </p>
+    </CardBody>
 </Card>
 
 @code {
     private string userName = string.Empty;
     private string userPicture = string.Empty;
+    private string userRole = string.Empty;
+    private string userEmail = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
         userName = await UserService.GetUserNameAsync() ?? "User";
+        userRole = await UserService.GetUserRoleAsync() ?? "No role set";
         userPicture = await UserService.GetUserPictureAsync() ?? "default.png";
+        userEmail = await UserService.GetUserEmailAsync() ?? "No email set";
     }
 }
