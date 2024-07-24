@@ -1,8 +1,8 @@
-@page "/Companies"
+@page "/Account"
 @attribute [Authorize]
 @rendermode InteractiveServer
 
-<PageTitle>Companies | Vex</PageTitle>
+<PageTitle>Account | Vex</PageTitle>
 
 <Tabs
     SelectedTab="@selectedTab"
@@ -11,26 +11,21 @@
     RenderMode="TabsRenderMode.LazyLoad"
 >
     <Items>
-        <Tab Name="Create">Create</Tab>
-        <Tab Name="Companies">Companies</Tab>
+        <Tab Name="Profile">Profile</Tab>
         <Tab Name="Analytics">Analytics</Tab>
     </Items>
     <Content>
-        <TabPanel Name="Create">
-            <CompaniesCreate />
-        </TabPanel>
-        <TabPanel Name="Companies">
-            <CompaniesGrid />
+        <TabPanel Name="Profile">
+            <Profile />
         </TabPanel>
         <TabPanel Name="Analytics">
-            <CompaniesAnalytics />
+            <ProfileAnalytics />
         </TabPanel>
     </Content>
 </Tabs>
 
 @code{
-    string selectedTab = "Create";
-
+    string selectedTab = "Profile";
     private Task OnSelectedTabChanged( string name )
     {
         selectedTab = name;

@@ -1,0 +1,23 @@
+@page "/Account/Profile"
+@attribute [Authorize]
+@inject UserService UserService
+
+<PageTitle>Profile | Vex</PageTitle>
+
+<Card>
+    <CardHeader>
+        <CardTitle>Welcome, @userName</CardTitle>
+        <Image Source="@userPicture" Text="@userName" />
+    </CardHeader>
+</Card>
+
+@code {
+    private string userName = string.Empty;
+    private string userPicture = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        userName = await UserService.GetUserNameAsync() ?? "User";
+        userPicture = await UserService.GetUserPictureAsync() ?? "default.png";
+    }
+}

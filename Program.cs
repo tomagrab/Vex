@@ -31,7 +31,6 @@ if (string.IsNullOrEmpty(Auth0ClientId))
     throw new ArgumentNullException("VEX_AUTH0_CLIENT_ID environment variable is not set.");
 }
 
-
 // Add services to the container.
 builder.Services
     .AddDbContext<AppDbContext>(options => options.UseNpgsql(connectionString))
@@ -47,6 +46,7 @@ builder.Services.AddAuth0WebAppAuthentication(options =>
     options.ClientId = Auth0ClientId;
 });
 
+builder.Services.AddScoped<UserService>();
 
 var app = builder.Build();
 
@@ -57,7 +57,6 @@ if (!app.Environment.IsDevelopment())
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
-
 
 app.MapGet("/Account/Login", async (HttpContext httpContext, string returnUrl = "/") =>
 {

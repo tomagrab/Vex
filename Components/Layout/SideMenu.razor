@@ -14,49 +14,53 @@
         </BarItem>
     </BarBrand>
     <BarMenu>
-        <BarStart>
-            <BarItem>
-                <BarLink To="/">
-                    <BarIcon IconName="IconName.Dashboard" />
-                    Dashboard
-                </BarLink>
-            </BarItem>
-            <BarItem>
-                <BarLink To="/Tickets">
-                    <BarIcon IconName="IconName.Ticket" />
-                    Tickets
-                </BarLink>
-            </BarItem>
-            <BarItem>
-                <BarLink To="/Companies">
-                    <BarIcon IconName="IconName.City" />
-                    Companies
-                </BarLink>
-            </BarItem>
-            <BarItem>
-                <BarLink To="/Branches">
-                    <BarIcon IconName="IconName.Building" />
-                    Branches
-                </BarLink>
-            </BarItem>
-        </BarStart>
-    </BarMenu>
-    <CascadingAuthenticationState>
-        <AuthorizeView>
-            <Authorized>
-                <BarMenu>
+        <CascadingAuthenticationState>
+            <BarStart>
+                <BarItem>
+                    <BarLink To="/">
+                        <BarIcon IconName="IconName.Dashboard" />
+                        Dashboard
+                    </BarLink>
+                </BarItem>
+                <AuthorizeView>
+                    <BarItem>
+                        <BarLink To="/Tickets">
+                            <BarIcon IconName="IconName.Ticket" />
+                            Tickets
+                        </BarLink>
+                    </BarItem>
+                    <BarItem>
+                        <BarLink To="/Companies">
+                            <BarIcon IconName="IconName.City" />
+                            Companies
+                        </BarLink>
+                    </BarItem>
+                    <BarItem>
+                        <BarLink To="/Branches">
+                            <BarIcon IconName="IconName.Building" />
+                            Branches
+                        </BarLink>
+                    </BarItem>
+                </AuthorizeView>
+            </BarStart>
+            <AuthorizeView>
+                <Authorized>
                     <BarEnd>
                         <BarItem>
-                            <BarLink To="Account/Profile">
-                                <BarIcon IconName="IconName.User" />
-                                Profile
+                            <BarLink To="Account">
+                                <BarIcon IconName="IconName.UserCircle" />
+                                Account
+                            </BarLink>
+                        </BarItem>
+                        <BarItem>
+                            <BarLink To="Account/Logout">
+                                <BarIcon IconName="IconName.Unlock" />
+                                Logout
                             </BarLink>
                         </BarItem>
                     </BarEnd>
-                </BarMenu>
-            </Authorized>
-            <NotAuthorized>
-                <BarMenu>
+                </Authorized>
+                <NotAuthorized>
                     <BarEnd>
                         <BarItem>
                             <BarLink To="Account/Login">
@@ -65,8 +69,8 @@
                             </BarLink>
                         </BarItem>
                     </BarEnd>
-                </BarMenu>
-            </NotAuthorized>
-        </AuthorizeView>
-    </CascadingAuthenticationState>
+                </NotAuthorized>
+            </AuthorizeView>
+        </CascadingAuthenticationState>
+    </BarMenu>
 </Bar>
