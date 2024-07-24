@@ -8,6 +8,7 @@ using Auth0.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Vex.Services;
+using Blazorise.RichTextEdit;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -38,6 +39,11 @@ builder.Services
     .AddBlazorise()
     .AddTailwindProviders()
     .AddFontAwesomeIcons()
+    .AddBlazoriseRichTextEdit(options =>
+    {
+        options.UseShowTheme = true;
+        options.UseBubbleTheme = true;
+    })
     .AddRazorComponents()
     .AddInteractiveServerComponents();
 
@@ -50,6 +56,22 @@ builder.Services.AddAuth0WebAppAuthentication(options =>
 builder.Services.AddScoped<IUserService, UserService>();
 
 var app = builder.Build();
+
+// Initialize the database with seed data
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        var context = services.GetRequiredService<AppDbContext>();
+        await DbInitializer.Initialize(services);
+    }
+    catch (Exception ex)
+    {
+        // Log errors or handle them as needed
+        Console.WriteLine("An error occurred while seeding the database: " + ex.Message);
+    }
+}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

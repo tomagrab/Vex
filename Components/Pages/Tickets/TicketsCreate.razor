@@ -56,18 +56,17 @@
                     <Field ColumnSize="ColumnSize.IsHalf">
                         <FieldLabel>Company</FieldLabel>
                         <FieldBody>
-                            <Select @bind-SelectedValue="@ticketModel.Company">
-                                <ChildContent>
-                                    <SelectItem TValue="CompanyModel"></SelectItem>
-                                    @foreach (var company in companies)
-                                    {
-                                        <SelectItem TValue="CompanyModel" Value="@company">@company.Name</SelectItem>
-                                    }
-                                </ChildContent>
-                                <Feedback>
-                                    <ValidationError />
-                                </Feedback>
-                            </Select>
+                            <Autocomplete
+                                TItem="CompanyModel"
+                                TValue="CompanyModel"
+                                Data="@companies"
+                                TextField="@((item) => item.Name)"
+                                ValueField="@((item) => item)"
+                                @bind-SelectedValue="ticketModel.Company"
+                                Placeholder="Company Name"
+                            >
+                                <NotFoundContent> Sorry... @context was not found! :( </NotFoundContent>
+                            </Autocomplete>
                         </FieldBody>
                     </Field>
                 </Validation>
@@ -75,30 +74,17 @@
                     <Field ColumnSize="ColumnSize.IsHalf">
                         <FieldLabel>Branch</FieldLabel>
                         <FieldBody>
-                            <Select @bind-SelectedValue="@ticketModel.Branch">
-                                <ChildContent>
-                                    <SelectItem TValue="BranchModel"></SelectItem>
-                                    @foreach (var branch in branches)
-                                    {
-                                        <SelectItem TValue="BranchModel" Value="@branch">@branch.Name</SelectItem>
-                                    }
-                                </ChildContent>
-                                <Feedback>
-                                    <ValidationError />
-                                </Feedback>
-                            </Select>
-                        </FieldBody>
-                    </Field>
-                </Validation>
-                <Validation>
-                    <Field ColumnSize="ColumnSize.IsHalf">
-                        <FieldLabel>Description</FieldLabel>
-                        <FieldBody>
-                            <TextEdit @bind-Text="@ticketModel.Description">
-                                <Feedback>
-                                    <ValidationError />
-                                </Feedback>
-                            </TextEdit>
+                            <Autocomplete
+                                TItem="BranchModel"
+                                TValue="BranchModel"
+                                Data="@branches"
+                                TextField="@((item) => item.Name)"
+                                ValueField="@((item) => item)"
+                                @bind-SelectedValue="ticketModel.Branch"
+                                Placeholder="Branch Name"
+                            >
+                                <NotFoundContent> Sorry... @context was not found! :( </NotFoundContent>
+                            </Autocomplete>
                         </FieldBody>
                     </Field>
                 </Validation>
@@ -106,12 +92,11 @@
                     <Field ColumnSize="ColumnSize.IsHalf">
                         <FieldLabel>Category</FieldLabel>
                         <FieldBody>
-                            <Select @bind-SelectedValue="@ticketModel.Category">
+                            <Select TValue="Guid" SelectedValue="selectedCategoryId" SelectedValueChanged="OnCategoryChanged">
                                 <ChildContent>
-                                    <SelectItem TValue="CategoryModel"></SelectItem>
                                     @foreach (var category in categories)
                                     {
-                                        <SelectItem TValue="CategoryModel" Value="@category">@category.Name</SelectItem>
+                                        <SelectItem TValue="Guid" Value="@category.Id">@category.Name</SelectItem>
                                     }
                                 </ChildContent>
                                 <Feedback>
@@ -125,9 +110,8 @@
                     <Field ColumnSize="ColumnSize.IsHalf">
                         <FieldLabel>SubCategory</FieldLabel>
                         <FieldBody>
-                            <Select @bind-SelectedValue="@ticketModel.SubCategory">
+                            <Select TValue="SubCategoryModel" @bind-SelectedValue="@ticketModel.SubCategory">
                                 <ChildContent>
-                                    <SelectItem TValue="SubCategoryModel"></SelectItem>
                                     @foreach (var subCategory in subCategories)
                                     {
                                         <SelectItem TValue="SubCategoryModel" Value="@subCategory">@subCategory.Name</SelectItem>
@@ -188,7 +172,7 @@
                     <Field ColumnSize="ColumnSize.IsHalf">
                         <FieldLabel>Assigned To</FieldLabel>
                         <FieldBody>
-                            <TextEdit @bind-Text="@ticketModel.AssignedTo" Placeholder="@userName">
+                            <TextEdit @bind-Text="@ticketModel.AssignedTo">
                                 <Feedback>
                                     <ValidationError />
                                 </Feedback>
@@ -200,7 +184,7 @@
                     <Field ColumnSize="ColumnSize.IsHalf">
                         <FieldLabel>Created By</FieldLabel>
                         <FieldBody>
-                            <TextEdit @bind-Text="@ticketModel.CreatedBy" Placeholder="@userName">
+                            <TextEdit @bind-Text="@ticketModel.CreatedBy">
                                 <Feedback>
                                     <ValidationError />
                                 </Feedback>
@@ -212,7 +196,7 @@
                     <Field ColumnSize="ColumnSize.IsHalf">
                         <FieldLabel>Updated By</FieldLabel>
                         <FieldBody>
-                            <TextEdit @bind-Text="@ticketModel.UpdatedBy" Placeholder="@userName">
+                            <TextEdit @bind-Text="@ticketModel.UpdatedBy">
                                 <Feedback>
                                     <ValidationError />
                                 </Feedback>
@@ -220,10 +204,36 @@
                         </FieldBody>
                     </Field>
                 </Validation>
+                <Validation>
+                    <Field ColumnSize="ColumnSize.IsFull">
+                        <FieldLabel>Description</FieldLabel>
+                        <FieldBody>
+                            <RichTextEdit
+                                @ref="richTextEditRef"
+                                Theme="RichTextEditTheme.Snow"
+                                ContentChanged="OnDescriptionChanged"
+                                class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500 disabled:cursor-not-allowed disabled:opacity-75 p-2.5 text-sm text-white border-none"
+                            >
+                                <Toolbar>
+                                    <RichTextEditToolbarGroup>
+                                        <RichTextEditToolbarButton Action="RichTextEditAction.Bold" />
+                                        <RichTextEditToolbarButton Action="RichTextEditAction.Italic" />
+                                        <RichTextEditToolbarButton Action="RichTextEditAction.Underline" />
+                                    </RichTextEditToolbarGroup>
+                                    <RichTextEditToolbarGroup>
+                                        <RichTextEditToolbarButton Action="RichTextEditAction.List" Value="ordered" />
+                                        <RichTextEditToolbarButton Action="RichTextEditAction.List" Value="bullet" />
+                                    </RichTextEditToolbarGroup>
+                                </Toolbar>
+                                <Editor>@ticketModel.Description</Editor>
+                            </RichTextEdit>
+                        </FieldBody>
+                    </Field>
+                </Validation>
             </Fields>
         </Validations>
         <Button Color="Color.Primary" Clicked="@OnSaveClicked">
-            Validate and Submit
+            Save
         </Button>
     </Column>
 </Row>
@@ -236,6 +246,8 @@
     private List<CategoryModel> categories = new();
     private List<SubCategoryModel> subCategories = new();
     private string userName = string.Empty;
+    private Guid selectedCategoryId;
+    private RichTextEdit richTextEditRef;
 
     protected override async Task OnInitializedAsync()
     {
@@ -249,7 +261,29 @@
         companies = await context.Companies.ToListAsync();
         branches = await context.Branches.ToListAsync();
         categories = await context.Categories.ToListAsync();
-        subCategories = await context.SubCategories.ToListAsync();
+        subCategories = new List<SubCategoryModel>();
+    }
+
+    private async Task OnCategoryChanged(Guid categoryId)
+    {
+        selectedCategoryId = categoryId;
+        Console.WriteLine("Category changed: " + categoryId);
+        if (categoryId != Guid.Empty)
+        {
+            await using var context = DbContextFactory.CreateDbContext();
+            subCategories = await SubCategoryModel.GetByCategoryAsync(context, categoryId);
+        }
+        else
+        {
+            subCategories = new List<SubCategoryModel>();
+        }
+        ticketModel.Category = categories.FirstOrDefault(c => c.Id == categoryId);
+        StateHasChanged();
+    }
+
+    private async Task OnDescriptionChanged()
+    {
+        ticketModel.Description = await richTextEditRef.GetHtmlAsync();
     }
 
     void ValidateEmail(ValidatorEventArgs e)
@@ -262,6 +296,7 @@
 
     private async Task OnSaveClicked()
     {
+        await OnDescriptionChanged();
         if (await validationsRef.ValidateAll())
         {
             ticketModel.CreatedBy = userName;
@@ -281,7 +316,7 @@
                 description: string.Empty,
                 category: new CategoryModel { Name = string.Empty },
                 subCategory: new SubCategoryModel { Name = string.Empty, Category = new CategoryModel { Name = string.Empty } },
-                assignedTo: string.Empty,
+                assignedTo: userName,
                 createdBy: userName,
                 updatedBy: userName
             );

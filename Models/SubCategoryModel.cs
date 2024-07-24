@@ -33,6 +33,13 @@ namespace Vex.Models
             return await context.SubCategories.FindAsync(id);
         }
 
+        public static async Task<List<SubCategoryModel>> GetByCategoryAsync(AppDbContext context, Guid categoryId)
+        {
+            return await context.SubCategories
+                .Where(sc => sc.Category.Id == categoryId)
+                .ToListAsync();
+        }
+
         public async Task CreateAsync(AppDbContext context)
         {
             context.SubCategories.Add(this);

@@ -31,3 +31,19 @@ h1:focus {
 .b-layout.b-layout-root > .b-layout-header.b-layout-header-fixed + .b-layout.b-layout-has-sider {
     margin-top: 0px !important;
 }
+
+.ql-snow .ql-stroke {
+    stroke: #fff !important;
+}
+
+.ql-toolbar.ql-snow {
+    border: none !important;
+}
+
+.ql-container.ql-snow {
+    border: none !important;
+}
+
+.ql-editor p {
+    color: #fff !important;
+}
