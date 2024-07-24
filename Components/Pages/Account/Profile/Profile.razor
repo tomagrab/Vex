@@ -1,6 +1,7 @@
 @page "/Account/Profile"
 @attribute [Authorize]
 @inject IUserService UserService
+@inject IAuth0Service Auth0Service
 
 <PageTitle>Profile | Vex</PageTitle>
 
@@ -25,5 +26,8 @@
     protected override async Task OnInitializedAsync()
     {
         userModel = await UserService.GetUserModelAsync();
+
+        var user = await Auth0Service.GetUserInfoAsync();
+        Console.WriteLine(user);
     }
 }

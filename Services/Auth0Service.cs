@@ -71,6 +71,21 @@ namespace Vex.Services
             return await response.Content.ReadAsStringAsync();
         }
 
+        public async Task<string> GetUserInfoAsync()
+        {
+            var token = await GetAuth0TokenAsync();
+
+            var request = new HttpRequestMessage(HttpMethod.Get, $"https://{_domain}/userinfo");
+
+            request.Headers.Add("Accept", "application/json");
+            request.Headers.Add("Authorization", $"Bearer {token}");
+
+            var response = await _httpClient.SendAsync(request);
+            response.EnsureSuccessStatusCode();
+
+            return await response.Content.ReadAsStringAsync();
+        }
+
         private class Auth0TokenResponse
         {
             [JsonPropertyName("access_token")]

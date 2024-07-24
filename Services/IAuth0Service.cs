@@ -5,5 +5,6 @@ namespace Vex.Services
         Task<string> GetAuth0TokenAsync();
         Task<string> GetUsersAsync();
         Task<string> GetUserByIdAsync(string userId);
+        Task<string> GetUserInfoAsync();
     }
 }
