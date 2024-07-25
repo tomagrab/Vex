@@ -1,5 +1,5 @@
 @rendermode InteractiveServer
-@inject IUserService UserService
+@inject Auth0Service Auth0Service
 
 <Bar Mode="BarMode.VerticalInline"
      CollapseMode="BarCollapseMode.Small"
@@ -80,6 +80,6 @@
     private UserModel? userModel;
     protected override async Task OnInitializedAsync()
     {
-        userModel = await UserService.GetUserModelAsync();
+        userModel = await Auth0Service.GetUserModelAsync();
     }
 }

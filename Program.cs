@@ -9,6 +9,8 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Vex.Services;
 using Blazorise.RichTextEdit;
+using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Components.Server;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -84,10 +86,25 @@ builder.Services.AddAuth0WebAppAuthentication(options =>
     };
 });
 
-builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddHttpClient<IAuth0Service, Auth0Service>(client =>
+builder.Services.AddScoped<AuthenticationStateProvider, ServerAuthenticationStateProvider>();
+
+// Register HttpContextAccessor to use it within the Auth0Service
+builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+
+// Configure HttpClient separately
+builder.Services.AddHttpClient("Auth0Client", client =>
 {
-    return new Auth0Service(client, Auth0ClientId, Auth0ClientSecret, Auth0Domain);
+    client.BaseAddress = new Uri($"https://{Auth0Domain}/");
+});
+
+// Register Auth0Service with required parameters
+builder.Services.AddScoped<Auth0Service>(serviceProvider =>
+{
+    var httpClientFactory = serviceProvider.GetRequiredService<IHttpClientFactory>();
+    var authStateProvider = serviceProvider.GetRequiredService<AuthenticationStateProvider>();
+
+    var httpClient = httpClientFactory.CreateClient("Auth0Client");
+    return new Auth0Service(httpClient, authStateProvider, Auth0ClientId, Auth0ClientSecret, Auth0Domain);
 });
 
 var app = builder.Build();

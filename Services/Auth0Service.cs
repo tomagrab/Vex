@@ -1,26 +1,67 @@
+using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Components.Authorization;
+using Vex.Models;
 
 namespace Vex.Services
 {
-    public class Auth0Service : IAuth0Service
+    public class Auth0Service
     {
         private readonly HttpClient _httpClient;
+        private readonly AuthenticationStateProvider _authenticationStateProvider;
+        private ClaimsPrincipal? _cachedUser;
+        private UserModel? _cachedUserModel;
+
         private HttpContext _httpContext => new HttpContextAccessor().HttpContext ?? throw new Exception("HttpContext is not available.");
         private readonly string _clientId;
         private readonly string _clientSecret;
         private readonly string _domain;
 
-        public Auth0Service(HttpClient httpClient, string clientId, string clientSecret, string domain)
+        public Auth0Service(HttpClient httpClient, AuthenticationStateProvider authenticationStateProvider, string clientId, string clientSecret, string domain)
         {
             _httpClient = httpClient;
+            _authenticationStateProvider = authenticationStateProvider;
             _clientId = clientId;
             _clientSecret = clientSecret;
             _domain = domain;
         }
 
+        // User-related methods from UserService
+        public async Task<ClaimsPrincipal?> GetUserAsync()
+        {
+            if (_cachedUser == null)
+            {
+                var authState = await _authenticationStateProvider.GetAuthenticationStateAsync();
+                _cachedUser = authState.User;
+            }
+            return _cachedUser;
+        }
+
+        public async Task<UserModel?> GetUserModelAsync()
+        {
+            if (_cachedUserModel == null)
+            {
+                var user = await GetUserAsync();
+
+                if (user != null && user.Identity != null && user.Identity.IsAuthenticated)
+                {
+                    _cachedUserModel = new UserModel
+                    {
+                        Id = user.FindFirst("user_id")?.Value,
+                        Name = user.Identity.Name,
+                        Role = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value,
+                        Picture = user.FindFirst("picture")?.Value,
+                        Email = user.FindFirst(ClaimTypes.Email)?.Value ?? user?.FindFirst("emailClaim")?.Value
+                    };
+                }
+            }
+            return _cachedUserModel;
+        }
+
+        // Auth0 token-related methods
         public async Task<string> GetAuth0TokenAsync()
         {
             var request = new HttpRequestMessage(HttpMethod.Post, $"https://{_domain}/oauth/token");
