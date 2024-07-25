@@ -485,3 +485,6 @@ $RECYCLE.BIN/
 
 # Database Migrations
 Migrations/
+
+# Misc
+Data/UserData.json

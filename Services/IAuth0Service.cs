@@ -9,7 +9,9 @@ namespace Vex.Services
         Task<string> GetAuth0AccessTokenAsync();
         Task<ClaimsPrincipal?> GetUserAsync();
         Task<UserModel?> GetUserModelAsync();
-        Task<string> GetUsersAsync();
+        Task<List<UserModel>> GetUsersAsync();
+        Task<List<UserModel>> GetUsersByRoleAsync(string roleId);
+        Task<List<RoleModel>> GetRolesAsync();
         Task<string> GetUserByIdAsync(string userId);
         Task<string> GetUserInfoAsync();
     }

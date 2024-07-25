@@ -8,7 +8,7 @@ using Vex.Models;
 
 namespace Vex.Services
 {
-    public class Auth0Service
+    public class Auth0Service : IAuth0Service
     {
         private readonly HttpClient _httpClient;
         private readonly AuthenticationStateProvider _authenticationStateProvider;
@@ -41,7 +41,7 @@ namespace Vex.Services
             response.EnsureSuccessStatusCode();
 
             var responseBody = await response.Content.ReadAsStringAsync();
-            var tokenResponse = JsonSerializer.Deserialize<Auth0TokenResponse>(responseBody);
+            var tokenResponse = JsonSerializer.Deserialize<Auth0TokenResponseModel>(responseBody);
 
             if (tokenResponse == null)
             {
@@ -98,11 +98,11 @@ namespace Vex.Services
             return _cachedUserModel;
         }
 
-        public async Task<string> GetUsersAsync()
+        public async Task<List<RoleModel>> GetRolesAsync()
         {
             var token = await GetAuth0TokenAsync();
 
-            var request = new HttpRequestMessage(HttpMethod.Get, $"https://{_domain}/api/v2/users");
+            var request = new HttpRequestMessage(HttpMethod.Get, $"https://{_domain}/api/v2/roles");
 
             request.Headers.Add("Accept", "application/json");
             request.Headers.Add("Authorization", $"Bearer {token}");
@@ -110,7 +110,65 @@ namespace Vex.Services
             var response = await _httpClient.SendAsync(request);
             response.EnsureSuccessStatusCode();
 
-            return await response.Content.ReadAsStringAsync();
+            var responseBody = await response.Content.ReadAsStringAsync();
+
+            var roles = JsonSerializer.Deserialize<List<RoleModel>>(responseBody);
+
+            if (roles == null)
+            {
+                throw new Exception("Failed to deserialize roles response.");
+            }
+
+            return roles;
+        }
+
+        public async Task<List<UserModel>> GetUsersByRoleAsync(string roleId)
+        {
+            var token = await GetAuth0TokenAsync();
+
+            var request = new HttpRequestMessage(HttpMethod.Get, $"https://{_domain}/api/v2/roles/{roleId}/users");
+
+            request.Headers.Add("Accept", "application/json");
+            request.Headers.Add("Authorization", $"Bearer {token}");
+
+            var response = await _httpClient.SendAsync(request);
+            response.EnsureSuccessStatusCode();
+
+            var responseBody = await response.Content.ReadAsStringAsync();
+
+            var users = JsonSerializer.Deserialize<List<Auth0UserModel>>(responseBody);
+
+            if (users == null)
+            {
+                throw new Exception("Failed to deserialize users response.");
+            }
+
+            return users.Select(u => new UserModel
+            {
+                Id = u.UserId,
+                Name = u.Name,
+                Picture = u.Picture,
+                Email = u.Email
+            }).ToList();
+        }
+
+        public async Task<List<UserModel>> GetUsersAsync()
+        {
+            var roles = await GetRolesAsync();
+
+            var allUsers = new List<UserModel>();
+
+            foreach (var role in roles)
+            {
+                var usersInRole = await GetUsersByRoleAsync(role.Id);
+                foreach (var user in usersInRole)
+                {
+                    user.Role = role.Name;
+                }
+                allUsers.AddRange(usersInRole);
+            }
+
+            return allUsers;
         }
 
         public async Task<string> GetUserByIdAsync(string userId)
@@ -141,15 +199,6 @@ namespace Vex.Services
             response.EnsureSuccessStatusCode();
 
             return await response.Content.ReadAsStringAsync();
-        }
-
-        private class Auth0TokenResponse
-        {
-            [JsonPropertyName("access_token")]
-            public required string AccessToken { get; set; }
-
-            [JsonPropertyName("token_type")]
-            public required string TokenType { get; set; }
         }
     }
 }

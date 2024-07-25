@@ -1,9 +1,8 @@
-@using System.Dynamic
-@typeparam TItem
+@typeparam TItem where TItem : class
 
 <DataGrid
-    TItem="ExpandoObject"
-    Data="inMemoryData"
+    TItem="TItem"
+    Data="@Items"
     Responsive
     ShowPager
     ShowPageSizes
@@ -22,7 +21,7 @@
                 <DataGridCheckColumn Field="@property.Name" Caption="@property.Name" Editable Filterable="false">
                     <DisplayTemplate>
                         @{
-                            var isChecked = (context as IDictionary<string, object>)[property.Name] as bool? ?? false;
+                            var isChecked = (context as TItem)?.GetType().GetProperty(property.Name)?.GetValue(context) as bool? ?? false;
                         }
                         <Check TValue="bool" Checked="@isChecked" Disabled ReadOnly />
                     </DisplayTemplate>
@@ -42,26 +41,4 @@
 
 @code {
     [Parameter, EditorRequired] public List<TItem> Items { get; set; } = new();
-
-    private List<ExpandoObject> inMemoryData = new();
-
-    protected override void OnParametersSet()
-    {
-        base.OnParametersSet();
-        BuildInMemoryData();
-    }
-
-    private void BuildInMemoryData()
-    {
-        inMemoryData.Clear();
-        foreach (var item in Items)
-        {
-            IDictionary<string, object?> expando = new ExpandoObject();
-            foreach (var property in typeof(TItem).GetProperties())
-            {
-                expando.Add(property.Name, property.GetValue(item));
-            }
-            inMemoryData.Add((ExpandoObject)expando);
-        }
-    }
 }
