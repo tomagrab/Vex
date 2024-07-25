@@ -9,6 +9,7 @@
 @inject IDbContextFactory<AppDbContext> DbContextFactory
 @inject IMessageService MessageService
 @inject Auth0Service Auth0Service
+@using System.Text.Json
 
 <PageTitle>Create Ticket | Vex</PageTitle>
 
@@ -229,6 +230,7 @@
     protected override async Task OnInitializedAsync()
     {
         userModel = await Auth0Service.GetUserModelAsync();
+
         await LoadDataAsync();
 
         if (userModel != null)
@@ -251,7 +253,6 @@
     private async Task OnCategoryChanged(Guid categoryId)
     {
         selectedCategoryId = categoryId;
-        Console.WriteLine("Category changed: " + categoryId);
         if (categoryId != Guid.Empty)
         {
             await using var context = DbContextFactory.CreateDbContext();

@@ -87,7 +87,7 @@ namespace Vex.Services
                 {
                     _cachedUserModel = new UserModel
                     {
-                        Id = user.FindFirst("user_id")?.Value,
+                        Id = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value,
                         Name = user.Identity.Name,
                         Role = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value,
                         Picture = user.FindFirst("picture")?.Value,
