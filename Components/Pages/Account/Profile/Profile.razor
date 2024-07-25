@@ -1,4 +1,4 @@
-@page "/Account/Profile"
+@page "/Profile"
 @attribute [Authorize]
 @inject IUserService UserService
 @inject IAuth0Service Auth0Service
@@ -21,13 +21,15 @@
 </Card>
 
 @code {
+    HttpContext? HttpContext;
     private UserModel? userModel;
 
     protected override async Task OnInitializedAsync()
     {
         userModel = await UserService.GetUserModelAsync();
 
-        var userInfo = await Auth0Service.GetUserInfoAsync();
-        Console.WriteLine(userInfo);
+        var user = await Auth0Service.GetUserInfoAsync(HttpContext);
+
+        Console.WriteLine(user);
     }
 }

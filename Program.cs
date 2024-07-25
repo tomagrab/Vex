@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Vex.Services;
 using Blazorise.RichTextEdit;
+using Microsoft.AspNetCore.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,6 +25,13 @@ var Auth0Domain = Environment.GetEnvironmentVariable("VEX_AUTH0_DOMAIN", Environ
 if (string.IsNullOrEmpty(Auth0Domain))
 {
     throw new ArgumentNullException("VEX_AUTH0_DOMAIN environment variable is not set.");
+}
+
+var Auth0Audience = $"https://{Auth0Domain}/api/v2/";
+
+if (string.IsNullOrEmpty(Auth0Audience))
+{
+    throw new ArgumentNullException("VEX_AUTH0_AUDIENCE environment variable is not set.");
 }
 
 var Auth0ClientId = Environment.GetEnvironmentVariable("VEX_AUTH0_CLIENT_ID", EnvironmentVariableTarget.Machine);
@@ -58,7 +66,22 @@ builder.Services.AddAuth0WebAppAuthentication(options =>
 {
     options.Domain = Auth0Domain;
     options.ClientId = Auth0ClientId;
+    options.ClientSecret = Auth0ClientSecret;
     options.Scope = "openid profile email";
+})
+.WithAccessToken(options =>
+{
+    options.Audience = Auth0Audience;
+    options.UseRefreshTokens = true;
+    options.Events = new Auth0WebAppWithAccessTokenEvents
+    {
+        OnMissingRefreshToken = async context =>
+        {
+            await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            var authenticationProperties = new LogoutAuthenticationPropertiesBuilder().WithRedirectUri("/").Build();
+            await context.ChallengeAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
+        }
+    };
 });
 
 builder.Services.AddScoped<IUserService, UserService>();
@@ -110,6 +133,12 @@ app.MapGet("/Account/Logout", async (HttpContext httpContext) =>
 
     await httpContext.SignOutAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
     await httpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+});
+
+app.MapGet("/Profile", [Authorize] async (HttpContext httpContext) =>
+{
+    var accessToken = await httpContext.GetTokenAsync("access_token");
+    Console.WriteLine($"Access token: {accessToken}");
 });
 
 app.UseHttpsRedirection();

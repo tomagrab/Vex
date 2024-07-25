@@ -1,6 +1,7 @@
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Authentication;
 
 namespace Vex.Services
 {
@@ -41,28 +42,15 @@ namespace Vex.Services
             return tokenResponse.AccessToken;
         }
 
-        public async Task<string> GetAuth0AccessTokenAsync()
+        public async Task<string> GetAuth0AccessTokenAsync(HttpContext httpContext)
         {
-            var request = new HttpRequestMessage(HttpMethod.Post, $"https://{_domain}/oauth/token");
-
-            var content = new StringContent($"grant_type=client_credentials&client_id={_clientId}&client_secret={_clientSecret}&audience=https://{_domain}/api/v2/", Encoding.UTF8, "application/x-www-form-urlencoded");
-
-            request.Content = content;
-
-            var response = await _httpClient.SendAsync(request);
-            response.EnsureSuccessStatusCode();
-
-            var responseBody = await response.Content.ReadAsStringAsync();
-            var tokenResponse = JsonSerializer.Deserialize<Auth0TokenResponse>(responseBody);
-
-            if (tokenResponse == null)
+            var accessToken = await httpContext.GetTokenAsync("access_token");
+            if (string.IsNullOrEmpty(accessToken))
             {
-                throw new Exception("Failed to deserialize token response.");
+                throw new Exception("Access token not found.");
             }
 
-            Console.WriteLine($"Access token: {tokenResponse.AccessToken}");
-
-            return tokenResponse.AccessToken;
+            return accessToken;
         }
 
         public async Task<string> GetUsersAsync()
@@ -95,18 +83,11 @@ namespace Vex.Services
             return await response.Content.ReadAsStringAsync();
         }
 
-        public async Task<string> GetUserInfoAsync()
+        public async Task<string> GetUserInfoAsync(HttpContext httpContext)
         {
-            var accessToken = await GetAuth0AccessTokenAsync();
+            var accessToken = await GetAuth0AccessTokenAsync(httpContext);
 
             var request = new HttpRequestMessage(HttpMethod.Get, $"https://{_domain}/userinfo");
-
-            Console.WriteLine($"Access token: {accessToken}");
-            Console.WriteLine($"Domain: {_domain}");
-            Console.WriteLine($"Client ID: {_clientId}");
-            Console.WriteLine($"Client Secret: {_clientSecret}");
-            Console.WriteLine($"Request URI: {request.RequestUri}");
-
 
             request.Headers.Add("Accept", "application/json");
             request.Headers.Add("Authorization", $"Bearer {accessToken}");
