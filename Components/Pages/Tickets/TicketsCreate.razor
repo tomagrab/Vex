@@ -8,7 +8,7 @@
 @using Blazorise.Icons.FontAwesome
 @inject IDbContextFactory<AppDbContext> DbContextFactory
 @inject IMessageService MessageService
-@inject IUserService UserService
+@inject Auth0Service Auth0Service
 
 <PageTitle>Create Ticket | Vex</PageTitle>
 
@@ -228,7 +228,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        userModel = await UserService.GetUserModelAsync();
+        userModel = await Auth0Service.GetUserModelAsync();
         await LoadDataAsync();
 
         if (userModel != null)

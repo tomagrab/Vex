@@ -29,39 +29,6 @@ namespace Vex.Services
             _domain = domain;
         }
 
-        // User-related methods from UserService
-        public async Task<ClaimsPrincipal?> GetUserAsync()
-        {
-            if (_cachedUser == null)
-            {
-                var authState = await _authenticationStateProvider.GetAuthenticationStateAsync();
-                _cachedUser = authState.User;
-            }
-            return _cachedUser;
-        }
-
-        public async Task<UserModel?> GetUserModelAsync()
-        {
-            if (_cachedUserModel == null)
-            {
-                var user = await GetUserAsync();
-
-                if (user != null && user.Identity != null && user.Identity.IsAuthenticated)
-                {
-                    _cachedUserModel = new UserModel
-                    {
-                        Id = user.FindFirst("user_id")?.Value,
-                        Name = user.Identity.Name,
-                        Role = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value,
-                        Picture = user.FindFirst("picture")?.Value,
-                        Email = user.FindFirst(ClaimTypes.Email)?.Value ?? user?.FindFirst("emailClaim")?.Value
-                    };
-                }
-            }
-            return _cachedUserModel;
-        }
-
-        // Auth0 token-related methods
         public async Task<string> GetAuth0TokenAsync()
         {
             var request = new HttpRequestMessage(HttpMethod.Post, $"https://{_domain}/oauth/token");
@@ -98,6 +65,37 @@ namespace Vex.Services
             }
 
             return accessToken;
+        }
+
+        public async Task<ClaimsPrincipal?> GetUserAsync()
+        {
+            if (_cachedUser == null)
+            {
+                var authState = await _authenticationStateProvider.GetAuthenticationStateAsync();
+                _cachedUser = authState.User;
+            }
+            return _cachedUser;
+        }
+
+        public async Task<UserModel?> GetUserModelAsync()
+        {
+            if (_cachedUserModel == null)
+            {
+                var user = await GetUserAsync();
+
+                if (user != null && user.Identity != null && user.Identity.IsAuthenticated)
+                {
+                    _cachedUserModel = new UserModel
+                    {
+                        Id = user.FindFirst("user_id")?.Value,
+                        Name = user.Identity.Name,
+                        Role = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value,
+                        Picture = user.FindFirst("picture")?.Value,
+                        Email = user.FindFirst(ClaimTypes.Email)?.Value ?? user?.FindFirst("emailClaim")?.Value
+                    };
+                }
+            }
+            return _cachedUserModel;
         }
 
         public async Task<string> GetUsersAsync()
