@@ -1,7 +1,6 @@
-@page "/Profile"
+@page "/Account/Profile"
 @attribute [Authorize]
 @inject IUserService UserService
-@inject IAuth0Service Auth0Service
 
 <PageTitle>Profile | Vex</PageTitle>
 
@@ -21,15 +20,10 @@
 </Card>
 
 @code {
-    HttpContext? HttpContext;
     private UserModel? userModel;
 
     protected override async Task OnInitializedAsync()
     {
         userModel = await UserService.GetUserModelAsync();
-
-        var user = await Auth0Service.GetUserInfoAsync(HttpContext);
-
-        Console.WriteLine(user);
     }
 }

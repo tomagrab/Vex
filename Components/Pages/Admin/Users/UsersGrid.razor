@@ -41,6 +41,5 @@
     protected override async Task OnInitializedAsync()
     {
         users = await Auth0Service.GetUsersAsync();
-        Console.WriteLine(users);
     }
 }

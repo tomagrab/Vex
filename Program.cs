@@ -9,7 +9,6 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Vex.Services;
 using Blazorise.RichTextEdit;
-using Microsoft.AspNetCore.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -51,6 +50,7 @@ if (string.IsNullOrEmpty(Auth0ClientSecret))
 // Add services to the container.
 builder.Services
     .AddDbContextFactory<AppDbContext>(options => options.UseNpgsql(connectionString))
+    .AddHttpContextAccessor()
     .AddBlazorise()
     .AddTailwindProviders()
     .AddFontAwesomeIcons()
@@ -134,15 +134,7 @@ app.MapGet("/Account/Logout", async (HttpContext httpContext) =>
     await httpContext.SignOutAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
     await httpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 });
-
-app.MapGet("/Profile", [Authorize] async (HttpContext httpContext) =>
-{
-    var accessToken = await httpContext.GetTokenAsync("access_token");
-    Console.WriteLine($"Access token: {accessToken}");
-});
-
 app.UseHttpsRedirection();
-
 app.UseStaticFiles();
 app.UseAntiforgery();
 

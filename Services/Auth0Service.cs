@@ -8,6 +8,7 @@ namespace Vex.Services
     public class Auth0Service : IAuth0Service
     {
         private readonly HttpClient _httpClient;
+        private HttpContext _httpContext => new HttpContextAccessor().HttpContext ?? throw new Exception("HttpContext is not available.");
         private readonly string _clientId;
         private readonly string _clientSecret;
         private readonly string _domain;
@@ -42,9 +43,14 @@ namespace Vex.Services
             return tokenResponse.AccessToken;
         }
 
-        public async Task<string> GetAuth0AccessTokenAsync(HttpContext httpContext)
+        public async Task<string> GetAuth0AccessTokenAsync()
         {
-            var accessToken = await httpContext.GetTokenAsync("access_token");
+            if (_httpContext == null)
+            {
+                throw new Exception("HttpContext is not available.");
+            }
+
+            var accessToken = await _httpContext.GetTokenAsync("access_token");
             if (string.IsNullOrEmpty(accessToken))
             {
                 throw new Exception("Access token not found.");
@@ -83,16 +89,15 @@ namespace Vex.Services
             return await response.Content.ReadAsStringAsync();
         }
 
-        public async Task<string> GetUserInfoAsync(HttpContext httpContext)
+        public async Task<string> GetUserInfoAsync()
         {
-            var accessToken = await GetAuth0AccessTokenAsync(httpContext);
+            var accessToken = await GetAuth0AccessTokenAsync();
 
             var request = new HttpRequestMessage(HttpMethod.Get, $"https://{_domain}/userinfo");
 
             request.Headers.Add("Accept", "application/json");
             request.Headers.Add("Authorization", $"Bearer {accessToken}");
 
-            Console.WriteLine($"Request: {request}");
             var response = await _httpClient.SendAsync(request);
             response.EnsureSuccessStatusCode();
 

@@ -30,6 +30,7 @@ namespace Vex.Services
             if (_cachedUserModel == null)
             {
                 var user = await GetUserAsync();
+
                 if (user != null && user.Identity != null && user.Identity.IsAuthenticated)
                 {
                     _cachedUserModel = new UserModel
