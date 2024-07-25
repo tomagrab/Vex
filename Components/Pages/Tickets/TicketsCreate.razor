@@ -66,7 +66,7 @@
                                 @bind-SelectedValue="ticketModel.Company"
                                 Placeholder="Company Name"
                             >
-                                <NotFoundContent> Sorry... @context was not found! :( </NotFoundContent>
+                                <NotFoundContent> Sorry... @context was not found! 😭 </NotFoundContent>
                             </Autocomplete>
                         </FieldBody>
                     </Field>
@@ -84,7 +84,7 @@
                                 @bind-SelectedValue="ticketModel.Branch"
                                 Placeholder="Branch Name"
                             >
-                                <NotFoundContent> Sorry... @context was not found! :( </NotFoundContent>
+                                <NotFoundContent> Sorry... @context was not found! 😭 </NotFoundContent>
                             </Autocomplete>
                         </FieldBody>
                     </Field>
@@ -173,11 +173,17 @@
                     <Field ColumnSize="ColumnSize.IsHalf">
                         <FieldLabel>Assigned To</FieldLabel>
                         <FieldBody>
-                            <TextEdit Text="@userModel?.Name" ReadOnly="true">
-                                <Feedback>
-                                    <ValidationError />
-                                </Feedback>
-                            </TextEdit>
+                            <Autocomplete
+                                TItem="UserModel"
+                                TValue="UserModel"
+                                Data="@users"
+                                TextField="@((item) => item.Name)"
+                                ValueField="@((item) => item)"
+                                @bind-SelectedValue="selectedUser"
+                                Placeholder="Select a user"
+                            >
+                                <NotFoundContent> Sorry... @context was not found! 😭 </NotFoundContent>
+                            </Autocomplete>
                         </FieldBody>
                     </Field>
                 </Validation>
@@ -222,14 +228,22 @@
     private List<BranchModel> branches = new();
     private List<CategoryModel> categories = new();
     private List<SubCategoryModel> subCategories = new();
+    private List<UserModel> users = new();
     private Guid selectedCategoryId;
     private RichTextEdit richTextEditRef;
-
     private UserModel? userModel;
+    private UserModel? selectedUser;
+    private bool isInitialized;
 
     protected override async Task OnInitializedAsync()
     {
         userModel = await Auth0Service.GetUserModelAsync();
+        users = await Auth0Service.GetUsersAsync();
+
+        if (userModel != null && !users.Any(u => u.Id == userModel.Id))
+        {
+            users.Add(userModel);
+        }
 
         await LoadDataAsync();
 
@@ -238,6 +252,17 @@
             ticketModel.CreatedBy = userModel.Id;
             ticketModel.UpdatedBy = userModel.Id;
             ticketModel.AssignedTo = userModel.Id;
+        }
+
+        isInitialized = true;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && isInitialized)
+        {
+            selectedUser = userModel;
+            StateHasChanged();
         }
     }
 
@@ -285,6 +310,7 @@
         if (await validationsRef.ValidateAll())
         {
             ticketModel.UpdatedBy = userModel?.Id;
+            ticketModel.AssignedTo = selectedUser?.Id;
 
             await using var context = DbContextFactory.CreateDbContext();
             context.Tickets.Add(ticketModel);
