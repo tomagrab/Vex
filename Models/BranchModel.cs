@@ -8,29 +8,30 @@ namespace Vex.Models
     {
         public Guid Id { get; set; }
 
-        [Required]
-        public required string Name { get; set; }
+        [Required(ErrorMessage = "Company is required.")]
+        public Guid CompanyId { get; set; }
+        public CompanyModel Company { get; set; } = null!;
 
-        [Required]
-        public required CompanyModel Company { get; set; }
+        [Required(ErrorMessage = "Branch name is required.")]
+        public string Name { get; set; }
 
         public BranchModel() {}
 
-        public BranchModel(string name, CompanyModel company)
+        public BranchModel(string name, Guid companyId)
         {
             Id = Guid.NewGuid();
             Name = name;
-            Company = company;
+            CompanyId = companyId;
         }
 
         public static async Task<List<BranchModel>> GetAllAsync(AppDbContext context)
         {
-            return await context.Branches.ToListAsync();
+            return await context.Branches.Include(b => b.Company).ToListAsync();
         }
 
         public static async Task<BranchModel?> GetByIdAsync(AppDbContext context, Guid id)
         {
-            return await context.Branches.FindAsync(id);
+            return await context.Branches.Include(b => b.Company).FirstOrDefaultAsync(b => b.Id == id);
         }
 
         public async Task CreateAsync(AppDbContext context)

@@ -1,0 +1,91 @@
+@page "/Branches/Create"
+@attribute [Authorize]
+@rendermode InteractiveServer
+@using Microsoft.EntityFrameworkCore
+@inject IDbContextFactory<AppDbContext> DbContextFactory
+@inject IMessageService MessageService
+
+<PageTitle>Create Branch | Vex</PageTitle>
+
+<Row>
+    <Column>
+        <Validations @ref="validationsRef" Mode="ValidationMode.Manual" Model="@branchModel" ValidateOnLoad="false">
+            <Fields>
+                <Validation>
+                    <Field ColumnSize="ColumnSize.IsHalf">
+                        <FieldLabel>Branch Name</FieldLabel>
+                        <FieldBody>
+                            <TextEdit @bind-Text="@branchModel.Name" Placeholder="Enter branch name" Required="true">
+                                <Feedback>
+                                    <ValidationNone>Branch name is required.</ValidationNone>
+                                    <ValidationError>Please enter a valid branch name.</ValidationError>
+                                </Feedback>
+                            </TextEdit>
+                        </FieldBody>
+                    </Field>
+                </Validation>
+                <Validation>
+                    <Field ColumnSize="ColumnSize.IsHalf">
+                        <FieldLabel>Company</FieldLabel>
+                        <FieldBody>
+                            <Autocomplete
+                                TItem="CompanyModel"
+                                TValue="Guid"
+                                Data="@companies"
+                                TextField="@((item) => item.Name)"
+                                ValueField="@((item) => item.Id)"
+                                @bind-SelectedValue="branchModel.CompanyId"
+                                Placeholder="Select a company"
+                                Required="true"
+                            >
+                                <NotFoundContent> Sorry... @context was not found! 😭 </NotFoundContent>
+                            </Autocomplete>
+                            <Feedback>
+                                <ValidationNone>Please select a company.</ValidationNone>
+                                <ValidationError>Company selection is required.</ValidationError>
+                            </Feedback>
+                        </FieldBody>
+                    </Field>
+                </Validation>
+            </Fields>
+        </Validations>
+        <Button Color="Color.Primary" Clicked="@OnSaveClicked">
+            Save
+        </Button>
+    </Column>
+</Row>
+
+@code {
+    private Validations validationsRef = new();
+    private BranchModel branchModel = new BranchModel { Name = string.Empty, CompanyId = Guid.Empty };
+    private List<CompanyModel> companies = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCompaniesAsync();
+    }
+
+    private async Task LoadCompaniesAsync()
+    {
+        await using var context = DbContextFactory.CreateDbContext();
+        companies = await CompanyModel.GetAllAsync(context);
+    }
+
+    private async Task OnSaveClicked()
+    {
+        if (await validationsRef.ValidateAll())
+        {
+            await using var context = DbContextFactory.CreateDbContext();
+            branchModel.Company = await context.Companies.FindAsync(branchModel.CompanyId);
+            await branchModel.CreateAsync(context);
+
+            await MessageService.Info("Branch created successfully.");
+            branchModel = new BranchModel { Name = string.Empty, CompanyId = Guid.Empty };
+            await validationsRef.ClearAll();
+        }
+        else
+        {
+            await MessageService.Error("Please fix the errors in the form.");
+        }
+    }
+}

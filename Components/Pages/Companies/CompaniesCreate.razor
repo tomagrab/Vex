@@ -1,0 +1,54 @@
+@page "/Companies/Create"
+@attribute [Authorize]
+@rendermode InteractiveServer
+@using Microsoft.EntityFrameworkCore
+@inject IDbContextFactory<AppDbContext> DbContextFactory
+@inject IMessageService MessageService
+
+<PageTitle>Create Company | Vex</PageTitle>
+
+<Row>
+    <Column>
+        <Validations @ref="validationsRef" Mode="ValidationMode.Manual" Model="@companyModel" ValidateOnLoad="false">
+            <Fields>
+                <Validation>
+                    <Field ColumnSize="ColumnSize.IsHalf">
+                        <FieldLabel>Company Name</FieldLabel>
+                        <FieldBody>
+                            <TextEdit @bind-Text="@companyModel.Name" Placeholder="Enter company name" Required="true">
+                                <Feedback>
+                                    <ValidationError />
+                                </Feedback>
+                            </TextEdit>
+                        </FieldBody>
+                    </Field>
+                </Validation>
+            </Fields>
+        </Validations>
+        <Button Color="Color.Primary" Clicked="@OnSaveClicked">
+            Save
+        </Button>
+    </Column>
+</Row>
+
+@code {
+    private Validations validationsRef = new();
+    private CompanyModel companyModel = new() { Name = string.Empty };
+
+    private async Task OnSaveClicked()
+    {
+        if (await validationsRef.ValidateAll())
+        {
+            await using var context = DbContextFactory.CreateDbContext();
+            await companyModel.CreateAsync(context);
+
+            await MessageService.Info("Company created successfully.");
+            companyModel = new CompanyModel() { Name = string.Empty };
+            await validationsRef.ClearAll();
+        }
+        else
+        {
+            await MessageService.Error("Please fix the errors in the form.");
+        }
+    }
+}

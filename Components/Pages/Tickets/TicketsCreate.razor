@@ -1,332 +1,127 @@
 @page "/Tickets/Create"
-@attribute [Authorize]
+@attribute [Authorize(Roles = "Admin, Manager, User")]
 @rendermode InteractiveServer
-@using Microsoft.EntityFrameworkCore
-@using Vex.Models
-@using Vex.Data
-@using Blazorise
-@using Blazorise.Icons.FontAwesome
-@inject IDbContextFactory<AppDbContext> DbContextFactory
-@inject IMessageService MessageService
-@inject Auth0Service Auth0Service
-@using System.Text.Json
 
 <PageTitle>Create Ticket | Vex</PageTitle>
 
-<Row>
-    <Column>
-        <Validations @ref="validationsRef" Mode="ValidationMode.Manual" Model="@ticketModel" ValidateOnLoad="false">
+<Div>
+    <Form>
+        <Validations
+            @ref="@ValidationsRef"
+            Mode="ValidationMode.Manual"
+            Model="@TicketModel"
+            ValidateOnLoad="false"
+        >
             <Fields>
                 <Validation>
                     <Field ColumnSize="ColumnSize.IsHalf">
-                        <FieldLabel>Contact</FieldLabel>
                         <FieldBody>
-                            <TextEdit @bind-Text="@ticketModel.Contact" Placeholder="Contact Name">
-                                <Feedback>
-                                    <ValidationError />
-                                </Feedback>
-                            </TextEdit>
+                            <Addons>
+                                <Addon AddonType="AddonType.Start">
+                                    <Tooltip Text=@ContactTooltipText>
+                                        <AddonLabel>Contact</AddonLabel>
+                                    </Tooltip>
+                                </Addon>
+                                <Addon AddonType="AddonType.Body">
+                                    <TextEdit
+                                        @bind-Text="@TicketModel.Contact">
+                                        <Feedback>
+                                            <ValidationError />
+                                        </Feedback>
+                                    </TextEdit>
+                                </Addon>
+                            </Addons>
                         </FieldBody>
                     </Field>
                 </Validation>
                 <Validation>
                     <Field ColumnSize="ColumnSize.IsHalf">
-                        <FieldLabel>Phone</FieldLabel>
                         <FieldBody>
-                            <InputMask @bind-Text="@ticketModel.Phone" Mask="(999) 999-9999" Placeholder="(999) 999-9999" >
-                                <Feedback>
-                                    <ValidationError />
-                                </Feedback>
-                            </InputMask>
-                        </FieldBody>
-                    </Field>
-                </Validation>
-                <Validation Validator="ValidateEmail">
-                    <Field ColumnSize="ColumnSize.IsHalf">
-                        <FieldLabel>Email</FieldLabel>
-                        <FieldBody>
-                            <TextEdit @bind-Text="@ticketModel.Email" Role="TextRole.Email" Placeholder="example@example.com">
-                                <Feedback>
-                                    <ValidationError />
-                                </Feedback>
-                            </TextEdit>
-                        </FieldBody>
-                    </Field>
-                </Validation>
-                <Validation>
-                    <Field ColumnSize="ColumnSize.IsHalf">
-                        <FieldLabel>Company</FieldLabel>
-                        <FieldBody>
-                            <Autocomplete
-                                TItem="CompanyModel"
-                                TValue="CompanyModel"
-                                Data="@companies"
-                                TextField="@((item) => item.Name)"
-                                ValueField="@((item) => item)"
-                                @bind-SelectedValue="ticketModel.Company"
-                                Placeholder="Company Name"
-                            >
-                                <NotFoundContent> Sorry... @context was not found! 😭 </NotFoundContent>
-                            </Autocomplete>
+                            <Addons>
+                                <Addon AddonType="AddonType.Start">
+                                    <Tooltip Text=@PhoneTooltipText>
+                                        <AddonLabel>Phone</AddonLabel>
+                                    </Tooltip>
+                                </Addon>
+                                <Addon AddonType="AddonType.Body">
+                                    <InputMask
+                                        @bind-Text="@TicketModel.Phone"
+                                        Mask="(999) 999-9999"
+                                    >
+                                        <Feedback>
+                                            <ValidationError />
+                                        </Feedback>
+                                    </InputMask>
+                                </Addon>
+                            </Addons>
                         </FieldBody>
                     </Field>
                 </Validation>
                 <Validation>
                     <Field ColumnSize="ColumnSize.IsHalf">
-                        <FieldLabel>Branch</FieldLabel>
                         <FieldBody>
-                            <Autocomplete
-                                TItem="BranchModel"
-                                TValue="BranchModel"
-                                Data="@branches"
-                                TextField="@((item) => item.Name)"
-                                ValueField="@((item) => item)"
-                                @bind-SelectedValue="ticketModel.Branch"
-                                Placeholder="Branch Name"
-                            >
-                                <NotFoundContent> Sorry... @context was not found! 😭 </NotFoundContent>
-                            </Autocomplete>
-                        </FieldBody>
-                    </Field>
-                </Validation>
-                <Validation>
-                    <Field ColumnSize="ColumnSize.IsHalf">
-                        <FieldLabel>Category</FieldLabel>
-                        <FieldBody>
-                            <Select TValue="Guid" SelectedValue="selectedCategoryId" SelectedValueChanged="OnCategoryChanged">
-                                <ChildContent>
-                                    @foreach (var category in categories)
-                                    {
-                                        <SelectItem TValue="Guid" Value="@category.Id">@category.Name</SelectItem>
-                                    }
-                                </ChildContent>
-                                <Feedback>
-                                    <ValidationError />
-                                </Feedback>
-                            </Select>
-                        </FieldBody>
-                    </Field>
-                </Validation>
-                <Validation>
-                    <Field ColumnSize="ColumnSize.IsHalf">
-                        <FieldLabel>SubCategory</FieldLabel>
-                        <FieldBody>
-                            <Select TValue="SubCategoryModel" @bind-SelectedValue="@ticketModel.SubCategory">
-                                <ChildContent>
-                                    @foreach (var subCategory in subCategories)
-                                    {
-                                        <SelectItem TValue="SubCategoryModel" Value="@subCategory">@subCategory.Name</SelectItem>
-                                    }
-                                </ChildContent>
-                                <Feedback>
-                                    <ValidationError />
-                                </Feedback>
-                            </Select>
-                        </FieldBody>
-                    </Field>
-                </Validation>
-                <Validation>
-                    <Field ColumnSize="ColumnSize.IsHalf">
-                        <FieldLabel>Status</FieldLabel>
-                        <FieldBody>
-                            <Select @bind-SelectedValue="@ticketModel.Status">
-                                <ChildContent>
-                                    @{
-                                        string Open = "Open";
-                                        string Pending = "Pending";
-                                        string Closed = "Closed";
-                                    }
-                                    <SelectItem TValue="string" Value="@Open">@Open</SelectItem>
-                                    <SelectItem TValue="string" Value="@Pending">@Pending</SelectItem>
-                                    <SelectItem TValue="string" Value="@Closed">@Closed</SelectItem>
-                                </ChildContent>
-                                <Feedback>
-                                    <ValidationError />
-                                </Feedback>
-                            </Select>
-                        </FieldBody>
-                    </Field>
-                </Validation>
-                <Validation>
-                    <Field ColumnSize="ColumnSize.IsHalf">
-                        <FieldLabel>Priority</FieldLabel>
-                        <FieldBody>
-                            <Select @bind-SelectedValue="@ticketModel.Priority">
-                                <ChildContent>
-                                    @{
-                                        string Low = "Low";
-                                        string Medium = "Medium";
-                                        string High = "High";
-                                    }
-                                    <SelectItem TValue="string" Value="@Low">@Low</SelectItem>
-                                    <SelectItem TValue="string" Value="@Medium">@Medium</SelectItem>
-                                    <SelectItem TValue="string" Value="@High">@High</SelectItem>
-                                </ChildContent>
-                                <Feedback>
-                                    <ValidationError />
-                                </Feedback>
-                            </Select>
-                        </FieldBody>
-                    </Field>
-                </Validation>
-                <Validation>
-                    <Field ColumnSize="ColumnSize.IsHalf">
-                        <FieldLabel>Assigned To</FieldLabel>
-                        <FieldBody>
-                            <Autocomplete
-                                TItem="UserModel"
-                                TValue="string"
-                                Data="@users"
-                                TextField="@((item) => item.Name)"
-                                ValueField="@((item) => item.Id)"
-                                @bind-SelectedValue="selectedUserId"
-                                @bind-SelectedText="selectedUserName"
-                                Placeholder="Select a user"
-                            >
-                                <NotFoundContent> Sorry... @context was not found! 😭 </NotFoundContent>
-                            </Autocomplete>
-                        </FieldBody>
-                    </Field>
-                </Validation>
-                <Validation>
-                    <Field ColumnSize="ColumnSize.IsFull">
-                        <FieldLabel>Description</FieldLabel>
-                        <FieldBody>
-                            <RichTextEdit
-                                @ref="richTextEditRef"
-                                Theme="RichTextEditTheme.Snow"
-                                ContentChanged="OnDescriptionChanged"
-                                class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500 disabled:cursor-not-allowed disabled:opacity-75 p-2.5 text-sm text-white border-none"
-                            >
-                                <Toolbar>
-                                    <RichTextEditToolbarGroup>
-                                        <RichTextEditToolbarButton Action="RichTextEditAction.Bold" />
-                                        <RichTextEditToolbarButton Action="RichTextEditAction.Italic" />
-                                        <RichTextEditToolbarButton Action="RichTextEditAction.Underline" />
-                                    </RichTextEditToolbarGroup>
-                                    <RichTextEditToolbarGroup>
-                                        <RichTextEditToolbarButton Action="RichTextEditAction.List" Value="ordered" />
-                                        <RichTextEditToolbarButton Action="RichTextEditAction.List" Value="bullet" />
-                                    </RichTextEditToolbarGroup>
-                                </Toolbar>
-                                <Editor>@ticketModel.Description</Editor>
-                            </RichTextEdit>
+                            <Addons>
+                                <Addon AddonType="AddonType.Start">
+                                    <Tooltip Text=@EmailTooltipText>
+                                        <AddonLabel>Email</AddonLabel>
+                                    </Tooltip>
+                                </Addon>
+                                <Addon AddonType="AddonType.Body">
+                                    <InputMask
+                                        @bind-Text="@TicketModel.Email"
+                                        Alias="email"
+                                    >
+                                        <Feedback>
+                                            <ValidationError />
+                                        </Feedback>
+                                    </InputMask>
+                                </Addon>
+                            </Addons>
                         </FieldBody>
                     </Field>
                 </Validation>
             </Fields>
         </Validations>
-        <Button Color="Color.Primary" Clicked="@OnSaveClicked">
-            Save
+        <Button
+            Color="Color.Primary"
+            Clicked="@OnSaveClicked"
+            Type="ButtonType.Submit"
+        >
+            Validate and Submit
         </Button>
-    </Column>
-</Row>
+    </Form>
+</Div>
 
 @code {
-    private Validations validationsRef = new();
-    private TicketModel ticketModel = new TicketModel();
-    private List<CompanyModel> companies = new();
-    private List<BranchModel> branches = new();
-    private List<CategoryModel> categories = new();
-    private List<SubCategoryModel> subCategories = new();
-    private List<UserModel> users = new();
-    private Guid selectedCategoryId;
-    private RichTextEdit richTextEditRef;
-    private UserModel? userModel;
-    private string selectedUserId;
-    private string selectedUserName;
+    [Inject] IMessageService MessageService { get; set; }
 
-    protected override async Task OnInitializedAsync()
-    {
-        userModel = await Auth0Service.GetUserModelAsync();
-        users = await Auth0Service.GetUsersAsync();
+    Validations ValidationsRef { get; set; }
 
-        if (userModel != null && !users.Any(u => u.Id == userModel.Id))
-        {
-            users.Add(userModel);
-        }
+    private TicketModel TicketModel { get; set; } = new TicketModel();
 
-        await LoadDataAsync();
+    #region Tooltips
 
-        if (userModel != null)
-        {
-            selectedUserId = userModel.Id;
-            selectedUserName = userModel.Name;
-            ticketModel.CreatedBy = userModel.Id;
-            ticketModel.UpdatedBy = userModel.Id;
-            ticketModel.AssignedTo = userModel.Id;
-        }
-    }
+        private string ContactTooltipText = "The name of the caller";
+        private string PhoneTooltipText = "The phone number of the caller";
+        private string EmailTooltipText = "The email address of the caller";
+        private string CompanyTooltipText = "The company of the caller";
+        private string BranchTooltipText = "The branch of the caller";
+        private string CategoryTooltipText = "The category of the ticket";
+        private string SubcategoryTooltipText = "The subcategory of the ticket";
+        private string StatusTooltipText = "The status of the ticket";
+        private string PriorityTooltipText = "The priority of the ticket";
+        private string DescriptionTooltipText = "The description of the ticket";
+        private string AssignedToTooltipText = "The person assigned to this ticket";
 
-    private async Task LoadDataAsync()
-    {
-        await using var context = DbContextFactory.CreateDbContext();
-        companies = await context.Companies.ToListAsync();
-        branches = await context.Branches.ToListAsync();
-        categories = await context.Categories.ToListAsync();
-        subCategories = await SubCategoryModel.GetByCategoryAsync(context, categories.FirstOrDefault()?.Id ?? Guid.Empty);
-    }
-
-    private async Task OnCategoryChanged(Guid categoryId)
-    {
-        selectedCategoryId = categoryId;
-        if (categoryId != Guid.Empty)
-        {
-            await using var context = DbContextFactory.CreateDbContext();
-            subCategories = await SubCategoryModel.GetByCategoryAsync(context, categoryId);
-        }
-        else
-        {
-            subCategories = new List<SubCategoryModel>();
-        }
-        ticketModel.Category = categories.FirstOrDefault(c => c.Id == categoryId);
-        StateHasChanged();
-    }
-
-    private async Task OnDescriptionChanged()
-    {
-        ticketModel.Description = await richTextEditRef.GetHtmlAsync();
-    }
-
-    void ValidateEmail(ValidatorEventArgs e)
-    {
-        var email = Convert.ToString(e.Value);
-
-        e.Status = string.IsNullOrEmpty(email) ? ValidationStatus.None :
-            email.Contains("@") ? ValidationStatus.Success : ValidationStatus.Error;
-    }
+    #endregion
 
     private async Task OnSaveClicked()
     {
-        await OnDescriptionChanged();
-        if (await validationsRef.ValidateAll())
+        if ( await ValidationsRef.ValidateAll() )
         {
-            ticketModel.UpdatedBy = userModel?.Id;
-            ticketModel.AssignedTo = selectedUserId;
+            await MessageService.Info( "Thank you for filling the form." );
 
-            await using var context = DbContextFactory.CreateDbContext();
-            context.Tickets.Add(ticketModel);
-            await context.SaveChangesAsync();
-
-            await MessageService.Info("Ticket created successfully.");
-            ticketModel = new TicketModel(
-                contact: string.Empty,
-                phone: string.Empty,
-                email: string.Empty,
-                company: new CompanyModel { Name = string.Empty },
-                branch: new BranchModel { Name = string.Empty, Company = new CompanyModel { Name = string.Empty } },
-                description: string.Empty,
-                category: new CategoryModel { Name = string.Empty },
-                subCategory: new SubCategoryModel { Name = string.Empty, Category = new CategoryModel { Name = string.Empty } },
-                assignedTo: userModel?.Id,
-                createdBy: userModel?.Id,
-                updatedBy: userModel?.Id
-            );
-            await validationsRef.ClearAll();
-        }
-        else
-        {
-            await MessageService.Error("Please fix the errors in the form.");
+            await ValidationsRef.ClearAll();
         }
     }
 }

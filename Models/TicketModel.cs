@@ -25,9 +25,6 @@ namespace Vex.Models
         public BranchModel Branch { get; set; } = new BranchModel { Name = string.Empty, Company = new CompanyModel { Name = string.Empty } };
 
         [Required]
-        public string Description { get; set; } = string.Empty;
-
-        [Required]
         public CategoryModel Category { get; set; } = new CategoryModel { Name = string.Empty };
 
         [Required]
@@ -38,6 +35,9 @@ namespace Vex.Models
 
         [Required]
         public string Priority { get; set; } = string.Empty;
+
+        [Required]
+        public string Description { get; set; } = string.Empty;
 
         [Required]
         public string AssignedTo { get; set; } = string.Empty;
