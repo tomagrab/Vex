@@ -175,11 +175,12 @@
                         <FieldBody>
                             <Autocomplete
                                 TItem="UserModel"
-                                TValue="UserModel"
+                                TValue="string"
                                 Data="@users"
                                 TextField="@((item) => item.Name)"
-                                ValueField="@((item) => item)"
-                                @bind-SelectedValue="selectedUser"
+                                ValueField="@((item) => item.Id)"
+                                @bind-SelectedValue="selectedUserId"
+                                @bind-SelectedText="selectedUserName"
                                 Placeholder="Select a user"
                             >
                                 <NotFoundContent> Sorry... @context was not found! 😭 </NotFoundContent>
@@ -232,8 +233,8 @@
     private Guid selectedCategoryId;
     private RichTextEdit richTextEditRef;
     private UserModel? userModel;
-    private UserModel? selectedUser;
-    private bool isInitialized;
+    private string selectedUserId;
+    private string selectedUserName;
 
     protected override async Task OnInitializedAsync()
     {
@@ -249,20 +250,11 @@
 
         if (userModel != null)
         {
+            selectedUserId = userModel.Id;
+            selectedUserName = userModel.Name;
             ticketModel.CreatedBy = userModel.Id;
             ticketModel.UpdatedBy = userModel.Id;
             ticketModel.AssignedTo = userModel.Id;
-        }
-
-        isInitialized = true;
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender && isInitialized)
-        {
-            selectedUser = userModel;
-            StateHasChanged();
         }
     }
 
@@ -310,7 +302,7 @@
         if (await validationsRef.ValidateAll())
         {
             ticketModel.UpdatedBy = userModel?.Id;
-            ticketModel.AssignedTo = selectedUser?.Id;
+            ticketModel.AssignedTo = selectedUserId;
 
             await using var context = DbContextFactory.CreateDbContext();
             context.Tickets.Add(ticketModel);
