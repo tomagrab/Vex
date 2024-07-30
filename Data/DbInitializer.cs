@@ -8,11 +8,12 @@ public static class DbInitializer
     {
         using var context = serviceProvider.GetRequiredService<AppDbContext>();
         await AddCategoriesAndSubcategoriesAsync(context);
+        await AddPrioritiesAsync(context);
+        await AddStatusesAsync(context);
     }
 
     private static async Task AddCategoriesAndSubcategoriesAsync(AppDbContext context)
     {
-        // Define categories and subcategories
         var categorySubcategories = new Dictionary<string, List<string>>
         {
             { "Mobile Application Support", new List<string> { "Application Error", "Application Freeze", "Device Setup", "Data Management", "General Question" } },
@@ -55,7 +56,38 @@ public static class DbInitializer
             }
         }
 
-        // Save all changes
+        await context.SaveChangesAsync();
+    }
+
+    private static async Task AddPrioritiesAsync(AppDbContext context)
+    {
+        var priorityNames = new List<string> { "Low", "Medium", "High" };
+
+        foreach (var priorityName in priorityNames)
+        {
+            if (!await context.Priorities.AnyAsync(p => p.Name == priorityName))
+            {
+                var priority = new PriorityModel{ Name = priorityName };
+                context.Priorities.Add(priority);
+            }
+        }
+
+        await context.SaveChangesAsync();
+    }
+
+    private static async Task AddStatusesAsync(AppDbContext context)
+    {
+        var statusNames = new List<string> { "Open", "Pending", "Closed" };
+
+        foreach (var statusName in statusNames)
+        {
+            if (!await context.Statuses.AnyAsync(s => s.Name == statusName))
+            {
+                var status = new StatusModel{ Name = statusName };
+                context.Statuses.Add(status);
+            }
+        }
+
         await context.SaveChangesAsync();
     }
 }

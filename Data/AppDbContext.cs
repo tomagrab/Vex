@@ -9,6 +9,8 @@ namespace Vex.Data
         public DbSet<CompanyModel> Companies { get; set; }
         public DbSet<CategoryModel> Categories { get; set; }
         public DbSet<SubCategoryModel> SubCategories { get; set; }
+        public DbSet<PriorityModel> Priorities { get; set; }
+        public DbSet<StatusModel> Statuses { get; set; }
         public DbSet<TicketModel> Tickets { get; set; }
 
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)

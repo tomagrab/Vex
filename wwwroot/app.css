@@ -47,3 +47,7 @@ h1:focus {
 .ql-editor p {
     color: #fff !important;
 }
+
+.ql-snow .ql-picker {
+    color: #fff !important;
+}
