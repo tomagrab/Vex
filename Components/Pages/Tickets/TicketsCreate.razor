@@ -15,269 +15,292 @@
             ValidateOnLoad="false"
         >
             <Fields>
-                <Validation Validator="ValidationRule.IsNotEmpty">
-                    <Field ColumnSize="ColumnSize.IsHalf">
-                        <FieldBody class="flex flex-col">
-                            <Addons>
-                                <Addon AddonType="AddonType.Start">
-                                    <Tooltip Text="The name of the caller">
-                                        <AddonLabel>Contact</AddonLabel>
-                                    </Tooltip>
-                                </Addon>
-                                <Addon AddonType="AddonType.Body">
-                                    <TextEdit @bind-Text="ticketModel.Contact" />
-                                </Addon>
-                            </Addons>
-                            <Feedback>
-                                <ValidationSuccess>Contact is valid</ValidationSuccess>
-                                <ValidationError>Contact cannot be empty</ValidationError>
-                            </Feedback>
-                        </FieldBody>
-                    </Field>
-                </Validation>
-                <Validation Validator="ValidationRule.IsNotEmpty">
-                    <Field ColumnSize="ColumnSize.IsHalf">
-                        <FieldBody class="flex flex-col">
-                            <Addons>
-                                <Addon AddonType="AddonType.Start">
-                                    <Tooltip Text="The phone number of the caller">
-                                        <AddonLabel>Phone</AddonLabel>
-                                    </Tooltip>
-                                </Addon>
-                                <Addon AddonType="AddonType.Body">
-                                    <InputMask @bind-Text="ticketModel.Phone" Mask="(999) 999-9999" />
-                                </Addon>
-                            </Addons>
-                            <Feedback>
-                                <ValidationSuccess>Phone is valid</ValidationSuccess>
-                                <ValidationError>Phone cannot be empty</ValidationError>
-                            </Feedback>
-                        </FieldBody>
-                    </Field>
-                </Validation>
-                <Validation Validator="ValidateEmail">
-                    <Field ColumnSize="ColumnSize.IsHalf">
-                        <FieldBody class="flex flex-col">
-                            <Addons>
-                                <Addon AddonType="AddonType.Start">
-                                    <Tooltip Text="The email address of the caller">
-                                        <AddonLabel>Email</AddonLabel>
-                                    </Tooltip>
-                                </Addon>
-                                <Addon AddonType="AddonType.Body">
-                                    <InputMask
-                                        @bind-Text="ticketModel.Email"
-                                        Alias="email"
-                                    />
-                                </Addon>
-                            </Addons>
-                            <Feedback>
-                                <ValidationSuccess>Email is valid</ValidationSuccess>
-                                <ValidationError>Must be a valid email address</ValidationError>
-                            </Feedback>
-                        </FieldBody>
-                    </Field>
-                </Validation>
-                <Validation Validator="ValidationRule.IsNotEmpty">
-                    <Field ColumnSize="ColumnSize.IsHalf">
-                        <FieldBody class="flex flex-col">
-                            <Addons>
-                                <Addon AddonType="AddonType.Start">
-                                    <Tooltip Text="The company of the caller">
-                                        <AddonLabel>Company</AddonLabel>
-                                    </Tooltip>
-                                </Addon>
-                                <Addon AddonType="AddonType.Body">
-                                    <TextEdit @bind-Text="ticketModel.Company.Name" />
-                                </Addon>
-                            </Addons>
-                            <Feedback>
-                                <ValidationSuccess>Company is valid</ValidationSuccess>
-                                <ValidationError>Company cannot be empty</ValidationError>
-                            </Feedback>
-                        </FieldBody>
-                    </Field>
-                </Validation>
-                <Validation Validator="ValidationRule.IsNotEmpty">
-                    <Field ColumnSize="ColumnSize.IsHalf">
-                        <FieldBody class="flex flex-col">
-                            <Addons>
-                                <Addon AddonType="AddonType.Start">
-                                    <Tooltip Text="The branch of the caller">
-                                        <AddonLabel>Branch</AddonLabel>
-                                    </Tooltip>
-                                </Addon>
-                                <Addon AddonType="AddonType.Body">
-                                    <TextEdit @bind-Text="ticketModel.Branch.Name" />
-                                </Addon>
-                            </Addons>
-                        </FieldBody>
-                        <Feedback>
-                            <ValidationSuccess>Branch is valid</ValidationSuccess>
-                            <ValidationError>Branch cannot be empty</ValidationError>
-                        </Feedback>
-                    </Field>
-                </Validation>
-                <Validation Validator="ValidationRule.IsNotEmpty">
-                    <Field ColumnSize="ColumnSize.IsHalf">
-                        <FieldBody class="flex flex-col">
-                            <Addons>
-                                <Addon AddonType="AddonType.Start">
-                                    <Tooltip Text="The category of the ticket">
-                                        <AddonLabel>Category</AddonLabel>
-                                    </Tooltip>
-                                </Addon>
-                                <Addon AddonType="AddonType.Body">
-                                    <Select
-                                        TValue="Guid"
-                                        SelectedValue="@(ticketModel.Category.Id)"
-                                        SelectedValueChanged="@((Guid CategoryId) => ticketModel.Category.Id = CategoryId)"
-                                    >
-                                        @foreach (var category in categories)
-                                        {
-                                            <SelectItem Value="@category.Id">@category.Name</SelectItem>
-                                        }
-                                    </Select>
-                                </Addon>
-                            </Addons>
-                            <Feedback>
-                                <ValidationSuccess>Category is valid</ValidationSuccess>
-                                <ValidationError>Category cannot be empty</ValidationError>
-                            </Feedback>
-                        </FieldBody>
-                    </Field>
-                </Validation>
-                <Validation Validator="ValidationRule.IsNotEmpty">
-                    <Field ColumnSize="ColumnSize.IsHalf">
-                        <FieldBody class="flex flex-col">
-                            <Addons>
-                                <Addon AddonType="AddonType.Start">
-                                    <Tooltip Text="The subcategory of the ticket">
-                                        <AddonLabel>SubCategory</AddonLabel>
-                                    </Tooltip>
-                                </Addon>
-                                <Addon AddonType="AddonType.Body">
-                                    <TextEdit @bind-Text="ticketModel.SubCategory.Name" />
-                                </Addon>
-                            </Addons>
-                            <Feedback>
-                                <ValidationSuccess>SubCategory is valid</ValidationSuccess>
-                                <ValidationError>SubCategory cannot be empty</ValidationError>
-                            </Feedback>
-                        </FieldBody>
-                    </Field>
-                </Validation>
-                <Validation Validator="ValidationRule.IsNotEmpty">
-                    <Field ColumnSize="ColumnSize.IsHalf">
-                        <FieldBody class="flex flex-col">
-                            <Addons>
-                                <Addon AddonType="AddonType.Start">
-                                    <Tooltip Text="The status of the ticket">
-                                        <AddonLabel>Status</AddonLabel>
-                                    </Tooltip>
-                                </Addon>
-                                <Addon AddonType="AddonType.Body">
-                                    <TextEdit @bind-Text="ticketModel.Status" />
-                                </Addon>
-                            </Addons>
-                            <Feedback>
-                                <ValidationSuccess>Status is valid</ValidationSuccess>
-                                <ValidationError>Status cannot be empty</ValidationError>
-                            </Feedback>
-                        </FieldBody>
-                    </Field>
-                </Validation>
-                <Validation Validator="ValidationRule.IsNotEmpty">
-                    <Field ColumnSize="ColumnSize.IsHalf">
-                        <FieldBody class="flex flex-col">
-                            <Addons>
-                                <Addon AddonType="AddonType.Start">
-                                    <Tooltip Text="The priority of the ticket">
-                                        <AddonLabel>Priority</AddonLabel>
-                                    </Tooltip>
-                                </Addon>
-                                <Addon AddonType="AddonType.Body">
-                                    <TextEdit @bind-Text="ticketModel.Priority" />
-                                </Addon>
-                            </Addons>
-                            <Feedback>
-                                <ValidationSuccess>Priority is valid</ValidationSuccess>
-                                <ValidationError>Priority cannot be empty</ValidationError>
-                            </Feedback>
-                        </FieldBody>
-                    </Field>
-                </Validation>
-                <Validation Validator="ValidationRule.IsNotEmpty">
-                    <Field ColumnSize="ColumnSize.IsHalf">
-                        <FieldBody class="flex flex-col">
-                            <Addons>
-                                <Addon AddonType="AddonType.Start">
-                                    <Tooltip Text="The person assigned to this ticket">
-                                        <AddonLabel>Assigned To</AddonLabel>
-                                    </Tooltip>
-                                </Addon>
-                                <Addon AddonType="AddonType.Body">
-                                    <TextEdit @bind-Text="ticketModel.AssignedTo" />
-                                </Addon>
-                            </Addons>
-                            <Feedback>
-                                <ValidationSuccess>Assigned To is valid</ValidationSuccess>
-                                <ValidationError>Assigned To cannot be empty</ValidationError>
-                            </Feedback>
-                        </FieldBody>
-                    </Field>
-                </Validation>
-                <Field ColumnSize="ColumnSize.IsFull">
-                    <FieldBody class="flex flex-col">
-                        <Addons>
-                            <Addon AddonType="AddonType.Start">
-                                <Tooltip Text="@DescriptionTooltipText">
-                                    <AddonLabel>Description</AddonLabel>
-                                </Tooltip>
-                            </Addon>
-                            <Addon AddonType="AddonType.Body">
-                                <RichTextEdit
-                                    @ref="DescriptionRef"
-                                    Theme="RichTextEditTheme.Snow"
-                                    ContentChanged="OnDescriptionChanged"
-                                    ReadOnly="@readOnly"
-                                    SubmitOnEnter="false"
-                                    ToolbarPosition="Placement.Top"
-                                    class="@GetDescriptionClass()"
-                                >
-                                    <Toolbar>
-                                        <RichTextEditToolbarGroup>
-                                            <RichTextEditToolbarButton Action="RichTextEditAction.Bold" />
-                                            <RichTextEditToolbarButton Action="RichTextEditAction.Italic" />
-                                            <RichTextEditToolbarButton Action="RichTextEditAction.Underline" />
-                                            <RichTextEditToolbarSelect Action="RichTextEditAction.Size">
-                                                <RichTextEditToolbarSelectItem Value="small" />
-                                                <RichTextEditToolbarSelectItem Selected />
-                                                <RichTextEditToolbarSelectItem Value="large" />
-                                                <RichTextEditToolbarSelectItem Value="huge">
-                                                    Very Big
-                                                </RichTextEditToolbarSelectItem>
-                                            </RichTextEditToolbarSelect>
-                                            <RichTextEditToolbarButton Action="RichTextEditAction.List" Value="ordered" />
-                                            <RichTextEditToolbarButton Action="RichTextEditAction.List" Value="bullet" />
-                                        </RichTextEditToolbarGroup>
-                                    </Toolbar>
-                                    <Editor></Editor>
-                                </RichTextEdit>
-                            </Addon>
-                        </Addons>
-                        <Feedback>
-                            @if ( showDescriptionError && string.IsNullOrWhiteSpace( contentAsText ) )
-                            {
-                                <Paragraph class="mt-2 text-sm text-danger-600 dark:text-danger-500">Description cannot be empty</Paragraph>
-                            }
-                            else if ( showDescriptionError )
-                            {
-                                <Paragraph class="mt-2 text-sm text-success-600 dark:text-success-500">Description is valid</Paragraph>
-                            }
-                        </Feedback>
-                    </FieldBody>
-                </Field>
+                <Grid>
+                    <Column ColumnSize="ColumnSize.IsThird">
+                        <Validation Validator="ValidationRule.IsNotEmpty">
+                            <Field>
+                                <FieldBody class="flex flex-col">
+                                    <Addons>
+                                        <Addon AddonType="AddonType.Start">
+                                            <Tooltip Text="The name of the caller">
+                                                <AddonLabel>Contact</AddonLabel>
+                                            </Tooltip>
+                                        </Addon>
+                                        <Addon AddonType="AddonType.Body">
+                                            <TextEdit @bind-Text="ticketModel.Contact" />
+                                        </Addon>
+                                    </Addons>
+                                    <Feedback>
+                                        <ValidationSuccess>Contact is valid</ValidationSuccess>
+                                        <ValidationError>Contact cannot be empty</ValidationError>
+                                    </Feedback>
+                                </FieldBody>
+                            </Field>
+                        </Validation>
+                        <Validation Validator="ValidationRule.IsNotEmpty">
+                            <Field>
+                                <FieldBody class="flex flex-col">
+                                    <Addons>
+                                        <Addon AddonType="AddonType.Start">
+                                            <Tooltip Text="The phone number of the caller">
+                                                <AddonLabel>Phone</AddonLabel>
+                                            </Tooltip>
+                                        </Addon>
+                                        <Addon AddonType="AddonType.Body">
+                                            <InputMask @bind-Text="ticketModel.Phone" Mask="(999) 999-9999" />
+                                        </Addon>
+                                    </Addons>
+                                    <Feedback>
+                                        <ValidationSuccess>Phone is valid</ValidationSuccess>
+                                        <ValidationError>Phone cannot be empty</ValidationError>
+                                    </Feedback>
+                                </FieldBody>
+                            </Field>
+                        </Validation>
+                        <Validation Validator="ValidateEmail">
+                        <Field>
+                            <FieldBody class="flex flex-col">
+                                <Addons>
+                                    <Addon AddonType="AddonType.Start">
+                                        <Tooltip Text="The email address of the caller">
+                                            <AddonLabel>Email</AddonLabel>
+                                        </Tooltip>
+                                    </Addon>
+                                    <Addon AddonType="AddonType.Body">
+                                        <InputMask
+                                            @bind-Text="ticketModel.Email"
+                                            Alias="email"
+                                        />
+                                    </Addon>
+                                </Addons>
+                                <Feedback>
+                                    <ValidationSuccess>Email is valid</ValidationSuccess>
+                                    <ValidationError>Must be a valid email address</ValidationError>
+                                </Feedback>
+                            </FieldBody>
+                        </Field>
+                        </Validation>
+                    </Column>
+                    <Column ColumnSize="ColumnSize.IsThird">
+                        <Validation Validator="ValidationRule.IsNotEmpty">
+                            <Field>
+                                <FieldBody class="flex flex-col">
+                                    <Addons>
+                                        <Addon AddonType="AddonType.Start">
+                                            <Tooltip Text="The company of the caller">
+                                                <AddonLabel>Company</AddonLabel>
+                                            </Tooltip>
+                                        </Addon>
+                                        <Addon AddonType="AddonType.Body">
+                                            <TextEdit @bind-Text="ticketModel.Company.Name" />
+                                        </Addon>
+                                    </Addons>
+                                    <Feedback>
+                                        <ValidationSuccess>Company is valid</ValidationSuccess>
+                                        <ValidationError>Company cannot be empty</ValidationError>
+                                    </Feedback>
+                                </FieldBody>
+                            </Field>
+                        </Validation>
+                        <Validation Validator="ValidationRule.IsNotEmpty">
+                            <Field>
+                                <FieldBody class="flex flex-col">
+                                    <Addons>
+                                        <Addon AddonType="AddonType.Start">
+                                            <Tooltip Text="The branch of the caller">
+                                                <AddonLabel>Branch</AddonLabel>
+                                            </Tooltip>
+                                        </Addon>
+                                        <Addon AddonType="AddonType.Body">
+                                            <TextEdit @bind-Text="ticketModel.Branch.Name" />
+                                        </Addon>
+                                    </Addons>
+                                </FieldBody>
+                                <Feedback>
+                                    <ValidationSuccess>Branch is valid</ValidationSuccess>
+                                    <ValidationError>Branch cannot be empty</ValidationError>
+                                </Feedback>
+                            </Field>
+                        </Validation>
+                    </Column>
+                    <Column ColumnSize="ColumnSize.IsThird">
+                        <Validation>
+                            <Field>
+                                <FieldBody class="flex flex-col">
+                                    <Addons>
+                                        <Addon AddonType="AddonType.Start">
+                                            <Tooltip Text="The category of the ticket">
+                                                <AddonLabel>Category</AddonLabel>
+                                            </Tooltip>
+                                        </Addon>
+                                        <Addon AddonType="AddonType.Body">
+                                            <Select
+                                                TValue="CategoryModel"
+                                                SelectedValue="@selectedCategory"
+                                                SelectedValueChanged="OnCategoryChanged"
+                                            >
+                                                @foreach (var category in categories)
+                                                {
+                                                    <SelectItem Value="@category">@category.Name</SelectItem>
+                                                }
+                                            </Select>
+                                        </Addon>
+                                    </Addons>
+                                    <Feedback>
+                                        <ValidationSuccess>Category is valid</ValidationSuccess>
+                                        <ValidationError>Category cannot be empty</ValidationError>
+                                    </Feedback>
+                                </FieldBody>
+                            </Field>
+                        </Validation>
+                        <Validation>
+                            <Field>
+                                <FieldBody class="flex flex-col">
+                                    <Addons>
+                                        <Addon AddonType="AddonType.Start">
+                                            <Tooltip Text="The subcategory of the ticket">
+                                                <AddonLabel>SubCategory</AddonLabel>
+                                            </Tooltip>
+                                        </Addon>
+                                        <Addon AddonType="AddonType.Body">
+                                            <Select
+                                                TValue="SubCategoryModel"
+                                                SelectedValue="@selectedSubCategory"
+                                                SelectedValueChanged="OnSubCategoryChanged"
+                                            >
+                                                @foreach (var subCategory in subCategories)
+                                                {
+                                                    <SelectItem Value="@subCategory">@subCategory.Name</SelectItem>
+                                                }
+                                            </Select>
+                                        </Addon>
+                                    </Addons>
+                                    <Feedback>
+                                        <ValidationSuccess>SubCategory is valid</ValidationSuccess>
+                                        <ValidationError>SubCategory cannot be empty</ValidationError>
+                                    </Feedback>
+                                </FieldBody>
+                            </Field>
+                        </Validation>
+                    </Column>
+                    <Column ColumnSize="ColumnSize.IsThird">
+                        <Validation Validator="ValidationRule.IsNotEmpty">
+                            <Field>
+                                <FieldBody class="flex flex-col">
+                                    <Addons>
+                                        <Addon AddonType="AddonType.Start">
+                                            <Tooltip Text="The status of the ticket">
+                                                <AddonLabel>Status</AddonLabel>
+                                            </Tooltip>
+                                        </Addon>
+                                        <Addon AddonType="AddonType.Body">
+                                            <TextEdit @bind-Text="ticketModel.Status" />
+                                        </Addon>
+                                    </Addons>
+                                    <Feedback>
+                                        <ValidationSuccess>Status is valid</ValidationSuccess>
+                                        <ValidationError>Status cannot be empty</ValidationError>
+                                    </Feedback>
+                                </FieldBody>
+                            </Field>
+                        </Validation>
+                        <Validation Validator="ValidationRule.IsNotEmpty">
+                            <Field>
+                                <FieldBody class="flex flex-col">
+                                    <Addons>
+                                        <Addon AddonType="AddonType.Start">
+                                            <Tooltip Text="The priority of the ticket">
+                                                <AddonLabel>Priority</AddonLabel>
+                                            </Tooltip>
+                                        </Addon>
+                                        <Addon AddonType="AddonType.Body">
+                                            <TextEdit @bind-Text="ticketModel.Priority" />
+                                        </Addon>
+                                    </Addons>
+                                    <Feedback>
+                                        <ValidationSuccess>Priority is valid</ValidationSuccess>
+                                        <ValidationError>Priority cannot be empty</ValidationError>
+                                    </Feedback>
+                                </FieldBody>
+                            </Field>
+                        </Validation>
+                    </Column>
+                    <Column ColumnSize="ColumnSize.Is8">
+                        <Validation Validator="ValidationRule.IsNotEmpty">
+                            <Field>
+                                <FieldBody class="flex flex-col">
+                                    <Addons>
+                                        <Addon AddonType="AddonType.Start">
+                                            <Tooltip Text="The person assigned to this ticket">
+                                                <AddonLabel>Assigned To</AddonLabel>
+                                            </Tooltip>
+                                        </Addon>
+                                        <Addon AddonType="AddonType.Body">
+                                            <TextEdit @bind-Text="ticketModel.AssignedTo" />
+                                        </Addon>
+                                    </Addons>
+                                    <Feedback>
+                                        <ValidationSuccess>Assigned To is valid</ValidationSuccess>
+                                        <ValidationError>Assigned To cannot be empty</ValidationError>
+                                    </Feedback>
+                                </FieldBody>
+                            </Field>
+                        </Validation>
+                    </Column>
+                    <Column ColumnSize="ColumnSize.IsFull">
+                        <Field>
+                            <FieldBody class="flex flex-col">
+                                <Addons>
+                                    <Addon AddonType="AddonType.Start">
+                                        <Tooltip Text="@DescriptionTooltipText">
+                                            <AddonLabel>Description</AddonLabel>
+                                        </Tooltip>
+                                    </Addon>
+                                    <Addon AddonType="AddonType.Body">
+                                        <RichTextEdit
+                                            @ref="DescriptionRef"
+                                            Theme="RichTextEditTheme.Snow"
+                                            ContentChanged="OnDescriptionChanged"
+                                            ReadOnly="@readOnly"
+                                            SubmitOnEnter="false"
+                                            ToolbarPosition="Placement.Top"
+                                            class="@GetDescriptionClass()"
+                                        >
+                                            <Toolbar>
+                                                <RichTextEditToolbarGroup>
+                                                    <RichTextEditToolbarButton Action="RichTextEditAction.Bold" />
+                                                    <RichTextEditToolbarButton Action="RichTextEditAction.Italic" />
+                                                    <RichTextEditToolbarButton Action="RichTextEditAction.Underline" />
+                                                    <RichTextEditToolbarSelect Action="RichTextEditAction.Size">
+                                                        <RichTextEditToolbarSelectItem Value="small" />
+                                                        <RichTextEditToolbarSelectItem Selected />
+                                                        <RichTextEditToolbarSelectItem Value="large" />
+                                                        <RichTextEditToolbarSelectItem Value="huge">
+                                                            Very Big
+                                                        </RichTextEditToolbarSelectItem>
+                                                    </RichTextEditToolbarSelect>
+                                                    <RichTextEditToolbarButton Action="RichTextEditAction.List" Value="ordered" />
+                                                    <RichTextEditToolbarButton Action="RichTextEditAction.List" Value="bullet" />
+                                                </RichTextEditToolbarGroup>
+                                            </Toolbar>
+                                            <Editor></Editor>
+                                        </RichTextEdit>
+                                    </Addon>
+                                </Addons>
+                                <Feedback>
+                                    @if ( showDescriptionError && string.IsNullOrWhiteSpace( contentAsText ) )
+                                    {
+                                        <Paragraph class="mt-2 text-sm text-danger-600 dark:text-danger-500">Description cannot be empty</Paragraph>
+                                    }
+                                    else if ( showDescriptionError )
+                                    {
+                                        <Paragraph class="mt-2 text-sm text-success-600 dark:text-success-500">Description is valid</Paragraph>
+                                    }
+                                </Feedback>
+                            </FieldBody>
+                        </Field>
+                    </Column>
+                </Grid>
             </Fields>
         </Validations>
         <Button Color="Color.Primary" Type="ButtonType.Submit">
@@ -329,6 +352,12 @@
 
             await LoadDataAsync();
 
+            selectedCategory = categories.FirstOrDefault();
+            ticketModel.Category = categories.FirstOrDefault();
+
+            selectedSubCategory = subCategories.FirstOrDefault();
+            ticketModel.SubCategory = subCategories.FirstOrDefault();
+
             if (currentUser != null)
             {
                 ticketModel.CreatedBy = currentUser.Id;
@@ -356,7 +385,7 @@
             companies = await context.Companies.ToListAsync();
             branches = await context.Branches.ToListAsync();
             categories = await context.Categories.ToListAsync();
-            subCategories = await context.SubCategories.ToListAsync();
+            subCategories = await SubCategoryModel.GetByCategoryAsync(context, categories.FirstOrDefault().Id);
             statuses = await context.Statuses.ToListAsync();
             priorities = await context.Priorities.ToListAsync();
         }
@@ -373,6 +402,18 @@
     #endregion
 
     #region Component Form Event Handlers
+        private async Task OnCategoryChanged(CategoryModel category)
+        {
+            selectedCategory = category;
+            ticketModel.Category = category;
+            subCategories = await SubCategoryModel.GetByCategoryAsync(DbContextFactory.CreateDbContext(), category.Id);
+            ticketModel.SubCategory = subCategories.FirstOrDefault();
+        }
+        private async Task OnSubCategoryChanged(SubCategoryModel subCategory)
+        {
+            selectedSubCategory = subCategory;
+            ticketModel.SubCategory = subCategory;
+        }
         private async Task OnDescriptionChanged()
         {
             contentAsText = await DescriptionRef.GetTextAsync();
