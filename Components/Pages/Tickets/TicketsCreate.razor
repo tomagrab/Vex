@@ -15,7 +15,7 @@
             ValidateOnLoad="false"
         >
             <Fields>
-                <Grid>
+                <Grid class="flex-1">
                     <Column ColumnSize="ColumnSize.IsThird">
                         <Validation Validator="ValidationRule.IsNotEmpty">
                             <Field>
@@ -124,7 +124,7 @@
                         </Validation>
                     </Column>
                     <Column ColumnSize="ColumnSize.IsThird">
-                        <Validation>
+                        <Validation Validator="ValidationRule.IsNotEmpty">
                             <Field>
                                 <FieldBody class="flex flex-col">
                                     <Addons>
@@ -153,7 +153,7 @@
                                 </FieldBody>
                             </Field>
                         </Validation>
-                        <Validation>
+                        <Validation Validator="ValidationRule.IsNotEmpty">
                             <Field>
                                 <FieldBody class="flex flex-col">
                                     <Addons>
