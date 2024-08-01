@@ -34,6 +34,13 @@ namespace Vex.Models
             return await context.Branches.Include(b => b.Company).FirstOrDefaultAsync(b => b.Id == id);
         }
 
+        public static async Task<List<BranchModel>> GetByCompanyAsync(AppDbContext context, Guid companyId)
+        {
+            return await context.Branches
+                .Where(b => b.CompanyId == companyId)
+                .ToListAsync();
+        }
+
         public async Task CreateAsync(AppDbContext context)
         {
             context.Branches.Add(this);

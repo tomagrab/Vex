@@ -1,8 +1,6 @@
 @page "/Tickets/Create"
 @attribute [Authorize(Roles = "Admin, Manager, User")]
 @rendermode InteractiveServer
-@inject IDbContextFactory<AppDbContext> DbContextFactory
-@inject Auth0Service Auth0Service
 
 <PageTitle>Create Ticket | Vex</PageTitle>
 
@@ -82,7 +80,7 @@
                         </Validation>
                     </Column>
                     <Column ColumnSize="ColumnSize.IsThird">
-                        <Validation Validator="ValidationRule.IsNotEmpty">
+                        <Validation Validator="ValidateCompany">
                             <Field>
                                 <FieldBody class="flex flex-col">
                                     <Addons>
@@ -92,7 +90,21 @@
                                             </Tooltip>
                                         </Addon>
                                         <Addon AddonType="AddonType.Body">
-                                            <TextEdit @bind-Text="ticketModel.Company.Name" />
+                                                <Autocomplete
+                                                    TItem="CompanyModel"
+                                                    TValue="CompanyModel"
+                                                    Data="@ReadDataCompanies"
+                                                    ReadData="@OnHandleReadDataCompanies"
+                                                    TextField="@((company) => company.Name)"
+                                                    ValueField="@((company) => company)"
+                                                    SelectedValue="@selectedCompany"
+                                                    SelectedValueChanged="@OnHandleCompanyChanged"
+                                                    HighlightSearch
+                                                    FreeTyping
+                                                    AutoSelectFirstItem="true"
+                                                >
+                                                    <NotFoundContent>Sorry... @context was not found! :(</NotFoundContent>
+                                                </Autocomplete>
                                         </Addon>
                                     </Addons>
                                     <Feedback>
@@ -102,26 +114,43 @@
                                 </FieldBody>
                             </Field>
                         </Validation>
-                        <Validation Validator="ValidationRule.IsNotEmpty">
-                            <Field>
-                                <FieldBody class="flex flex-col">
-                                    <Addons>
-                                        <Addon AddonType="AddonType.Start">
-                                            <Tooltip Text="The branch of the caller">
-                                                <AddonLabel>Branch</AddonLabel>
-                                            </Tooltip>
-                                        </Addon>
-                                        <Addon AddonType="AddonType.Body">
-                                            <TextEdit @bind-Text="ticketModel.Branch.Name" />
-                                        </Addon>
-                                    </Addons>
-                                </FieldBody>
-                                <Feedback>
-                                    <ValidationSuccess>Branch is valid</ValidationSuccess>
-                                    <ValidationError>Branch cannot be empty</ValidationError>
-                                </Feedback>
-                            </Field>
-                        </Validation>
+                        @* Only show branch autocomplete if Companies have been populated and set *@
+                        @if (selectedCompany != null && selectedCompany.Id != Guid.Empty && selectedCompany.Name != String.Empty)
+                        {
+                            <Validation Validator="ValidateBranch">
+                                <Field>
+                                    <FieldBody class="flex flex-col">
+                                        <Addons>
+                                            <Addon AddonType="AddonType.Start">
+                                                <Tooltip Text="The branch of the caller">
+                                                    <AddonLabel>Branch</AddonLabel>
+                                                </Tooltip>
+                                            </Addon>
+                                            <Addon AddonType="AddonType.Body">
+                                                <Autocomplete
+                                                        TItem="BranchModel"
+                                                        TValue="BranchModel"
+                                                        Data="@ReadDataBranches"
+                                                        ReadData="@OnHandleReadDataBranches"
+                                                        TextField="@((branch) => branch.Name)"
+                                                        ValueField="@((branch) => branch)"
+                                                        SelectedValue="@selectedBranch"
+                                                        SelectedValueChanged="@OnHandleBranchChanged"
+                                                        HighlightSearch
+                                                        FreeTyping
+                                                    >
+                                                        <NotFoundContent>Sorry... @context was not found! :(</NotFoundContent>
+                                                    </Autocomplete>
+                                            </Addon>
+                                        </Addons>
+                                    </FieldBody>
+                                    <Feedback>
+                                        <ValidationSuccess>Branch is valid</ValidationSuccess>
+                                        <ValidationError>Branch cannot be empty</ValidationError>
+                                    </Feedback>
+                                </Field>
+                            </Validation>
+                        }
                     </Column>
                     <Column ColumnSize="ColumnSize.IsThird">
                         <Validation Validator="ValidateCategory">
@@ -360,6 +389,8 @@
 @code {
     #region Component Dependencies
         [Inject] IMessageService MessageService { get; set; }
+        [Inject] IDbContextFactory<AppDbContext> DbContextFactory { get; set; }
+        [Inject] Auth0Service Auth0Service { get; set; }
     #endregion
 
     #region Component Fields
@@ -367,17 +398,28 @@
         private RichTextEdit DescriptionRef { get; set; }
         private TicketModel ticketModel { get; set; } = new TicketModel();
         private List<CompanyModel> companies = new List<CompanyModel>();
-        private CompanyModel selectedCompany;
+        private List<CompanyModel> ReadDataCompanies = new List<CompanyModel>();
+        private CompanyModel selectedCompany = new CompanyModel
+            {
+                Id = Guid.Empty,
+                Name = string.Empty
+            };
+
         private List<BranchModel> branches = new List<BranchModel>();
-        private BranchModel selectedBranch;
+        private List<BranchModel> ReadDataBranches = new List<BranchModel>();
+        private BranchModel selectedBranch = new BranchModel
+            {
+                Id = Guid.Empty,
+                Name = string.Empty
+            };
         private List<CategoryModel> categories = new List<CategoryModel>();
         private Guid selectedCategoryId;
         private List<SubCategoryModel> subCategories = new List<SubCategoryModel>();
         private Guid selectedSubCategoryId;
         private List<StatusModel> statuses = new List<StatusModel>();
-        private StatusModel selectedStatus;
+        private Guid selectedStatusId;
         private List<PriorityModel> priorities = new List<PriorityModel>();
-        private PriorityModel selectedPriority;
+        private Guid selectedPriorityId;
         private List<UserModel> users = new List<UserModel>();
         private UserModel assignedToUser;
         private UserModel currentUser;
@@ -385,6 +427,7 @@
         private string contentAsText;
         private bool showDescriptionError;
         private bool isInitialized;
+        private Random random = new Random();
     #endregion
 
     #region Component Initialization
@@ -398,14 +441,6 @@
                 users.Add(currentUser);
             }
 
-            await LoadDataAsync();
-
-            selectedCategoryId = categories.FirstOrDefault().Id;
-            ticketModel.Category = categories.Find(c => c.Id == selectedCategoryId);
-
-            selectedSubCategoryId = subCategories.FirstOrDefault().Id;
-            ticketModel.SubCategory = subCategories.Find(sc => sc.Id == selectedSubCategoryId);
-
             if (currentUser != null)
             {
                 ticketModel.CreatedBy = currentUser;
@@ -413,7 +448,10 @@
                 ticketModel.AssignedTo = currentUser;
             }
 
+            await LoadDataAsync();
             isInitialized = true;
+
+            await base.OnInitializedAsync();
         }
 
         protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -430,12 +468,35 @@
         private async Task LoadDataAsync()
         {
             await using var context = DbContextFactory.CreateDbContext();
+
             companies = await context.Companies.ToListAsync();
-            branches = await context.Branches.ToListAsync();
+            ReadDataCompanies = companies;
+            if (companies.Count > 0)
+            {
+                selectedCompany = companies.First();
+                ticketModel.Company = selectedCompany;
+
+                branches = await BranchModel.GetByCompanyAsync(context, selectedCompany.Id);
+                ReadDataBranches = branches;
+                selectedBranch = branches.FirstOrDefault();
+                ticketModel.Branch = selectedBranch;
+            }
+
             categories = await context.Categories.ToListAsync();
-            subCategories = await SubCategoryModel.GetByCategoryAsync(context, categories.FirstOrDefault().Id);
+            selectedCategoryId = categories.FirstOrDefault()?.Id ?? Guid.Empty;
+            ticketModel.Category = categories.FirstOrDefault(category => category.Id == selectedCategoryId);
+
+            subCategories = selectedCategoryId != Guid.Empty ? await SubCategoryModel.GetByCategoryAsync(context, selectedCategoryId) : new List<SubCategoryModel>();
+            selectedSubCategoryId = subCategories.FirstOrDefault()?.Id ?? Guid.Empty;
+            ticketModel.SubCategory = subCategories.FirstOrDefault(subCategory => subCategory.Id == selectedSubCategoryId);
+
             statuses = await context.Statuses.ToListAsync();
+            selectedStatusId = statuses.FirstOrDefault()?.Id ?? Guid.Empty;
+            ticketModel.Status = statuses.FirstOrDefault(status => status.Id == selectedStatusId);
+
             priorities = await context.Priorities.ToListAsync();
+            selectedPriorityId = priorities.FirstOrDefault()?.Id ?? Guid.Empty;
+            ticketModel.Priority = priorities.FirstOrDefault(priority => priority.Id == selectedPriorityId);
         }
     #endregion
 
@@ -446,6 +507,20 @@
 
             e.Status = string.IsNullOrEmpty(email) ? ValidationStatus.None :
                 email.Contains("@") ? ValidationStatus.Success : ValidationStatus.Error;
+        }
+
+        void ValidateCompany(ValidatorEventArgs e)
+        {
+            var company = e.Value as CompanyModel;
+
+            e.Status = company == null ? ValidationStatus.Error : ValidationStatus.Success;
+        }
+
+        void ValidateBranch(ValidatorEventArgs e)
+        {
+            var branch = e.Value as BranchModel;
+
+            e.Status = branch == null ? ValidationStatus.Error : ValidationStatus.Success;
         }
 
         void ValidateCategory(ValidatorEventArgs e)
@@ -491,6 +566,58 @@
         }
     #endregion
 
+    #region Component Event Handlers
+        private async Task OnHandleReadDataCompanies(AutocompleteReadDataEventArgs autocompleteReadDataEventArgs)
+        {
+            if (!autocompleteReadDataEventArgs.CancellationToken.IsCancellationRequested)
+            {
+                await Task.Delay(random.Next(100));
+                if (!autocompleteReadDataEventArgs.CancellationToken.IsCancellationRequested)
+                {
+                    ReadDataCompanies = companies
+                        .Where(c => c.Name.StartsWith(autocompleteReadDataEventArgs.SearchValue, StringComparison.InvariantCultureIgnoreCase))
+                        .ToList();
+                }
+            }
+        }
+
+        private async Task OnHandleCompanyChanged(CompanyModel company)
+        {
+            if (company != null)
+            {
+                selectedCompany = company;
+                ticketModel.Company = selectedCompany;
+
+                await using var context = DbContextFactory.CreateDbContext();
+                branches = await BranchModel.GetByCompanyAsync(context, selectedCompany.Id);
+                selectedBranch = branches.FirstOrDefault();
+                ReadDataBranches = branches;
+                ticketModel.Branch = selectedBranch;
+                StateHasChanged();
+            }
+        }
+
+        private async Task OnHandleReadDataBranches(AutocompleteReadDataEventArgs autocompleteReadDataEventArgs)
+        {
+            if (!autocompleteReadDataEventArgs.CancellationToken.IsCancellationRequested)
+            {
+                await Task.Delay(random.Next(100));
+                if (!autocompleteReadDataEventArgs.CancellationToken.IsCancellationRequested)
+                {
+                    ReadDataBranches = branches
+                        .Where(b => b.Name.StartsWith(autocompleteReadDataEventArgs.SearchValue, StringComparison.InvariantCultureIgnoreCase))
+                        .ToList();
+                }
+            }
+        }
+
+        private async Task OnHandleBranchChanged(BranchModel branch)
+        {
+            selectedBranch = branch;
+            ticketModel.Branch = branches.Find(b => b.Id == selectedBranch.Id);
+            StateHasChanged();
+        }
+
         private async Task OnCategoryChanged(Guid categoryId)
         {
 
@@ -499,7 +626,7 @@
             {
                 await using var context = DbContextFactory.CreateDbContext();
                 subCategories = await SubCategoryModel.GetByCategoryAsync(context, selectedCategoryId);
-                selectedSubCategoryId = subCategories.FirstOrDefault().Id;
+                selectedSubCategoryId = subCategories.FirstOrDefault()?.Id ?? Guid.Empty;
             }
             else
             {
@@ -534,6 +661,7 @@
                 await MessageService.Error("Description cannot be empty.");
             }
         }
+    #endregion
 
     #region Component Utility Methods
         private string GetDescriptionClass()

@@ -5,8 +5,8 @@ namespace Vex.Data
 {
     public class AppDbContext : DbContext
     {
-        public DbSet<BranchModel> Branches { get; set; }
         public DbSet<CompanyModel> Companies { get; set; }
+        public DbSet<BranchModel> Branches { get; set; }
         public DbSet<CategoryModel> Categories { get; set; }
         public DbSet<SubCategoryModel> SubCategories { get; set; }
         public DbSet<PriorityModel> Priorities { get; set; }

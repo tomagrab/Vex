@@ -48,6 +48,16 @@ h1:focus {
     color: #fff !important;
 }
 
-.ql-snow .ql-picker {
+.ql-picker-label {
     color: #fff !important;
+}
+
+div.b-is-autocomplete > input {
+    color: #fff !important;
+    border-top-left-radius: 0 !important;
+    border-bottom-left-radius: 0 !important;
+}
+
+strong {
+    font-weight: bold !important;
 }
