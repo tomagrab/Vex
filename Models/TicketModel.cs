@@ -31,22 +31,22 @@ namespace Vex.Models
         public SubCategoryModel SubCategory { get; set; } = new SubCategoryModel { Name = string.Empty, Category = new CategoryModel { Name = string.Empty } };
 
         [Required]
-        public string Status { get; set; } = string.Empty;
+        public StatusModel Status { get; set; } = new StatusModel { Name = string.Empty };
 
         [Required]
-        public string Priority { get; set; } = string.Empty;
+        public PriorityModel Priority { get; set; } = new PriorityModel { Name = string.Empty };
 
         [Required]
         public string Description { get; set; } = string.Empty;
 
         [Required]
-        public string AssignedTo { get; set; } = string.Empty;
+        public UserModel AssignedTo { get; set; } = new UserModel { Name = string.Empty };
 
         [Required]
-        public string CreatedBy { get; set; } = string.Empty;
+        public UserModel CreatedBy { get; set; } = new UserModel { Name = string.Empty };
 
         [Required]
-        public string UpdatedBy { get; set; } = string.Empty;
+        public UserModel UpdatedBy { get; set; } = new UserModel { Name = string.Empty };
 
         [Required]
         public DateTime CreatedAt { get; set; }
@@ -65,9 +65,11 @@ namespace Vex.Models
             string description,
             CategoryModel category,
             SubCategoryModel subCategory,
-            string assignedTo,
-            string createdBy,
-            string updatedBy)
+            PriorityModel priority,
+            StatusModel status,
+            UserModel assignedTo,
+            UserModel createdBy,
+            UserModel updatedBy)
         {
             Id = Guid.NewGuid();
             Contact = contact;
@@ -78,8 +80,8 @@ namespace Vex.Models
             Description = description;
             Category = category;
             SubCategory = subCategory;
-            Status = "Open";
-            Priority = "Low";
+            Status = status;
+            Priority = priority;
             AssignedTo = assignedTo;
             CreatedBy = createdBy;
             UpdatedBy = updatedBy;

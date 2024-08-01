@@ -58,27 +58,27 @@
                             </Field>
                         </Validation>
                         <Validation Validator="ValidateEmail">
-                        <Field>
-                            <FieldBody class="flex flex-col">
-                                <Addons>
-                                    <Addon AddonType="AddonType.Start">
-                                        <Tooltip Text="The email address of the caller">
-                                            <AddonLabel>Email</AddonLabel>
-                                        </Tooltip>
-                                    </Addon>
-                                    <Addon AddonType="AddonType.Body">
-                                        <InputMask
-                                            @bind-Text="ticketModel.Email"
-                                            Alias="email"
-                                        />
-                                    </Addon>
-                                </Addons>
-                                <Feedback>
-                                    <ValidationSuccess>Email is valid</ValidationSuccess>
-                                    <ValidationError>Must be a valid email address</ValidationError>
-                                </Feedback>
-                            </FieldBody>
-                        </Field>
+                            <Field>
+                                <FieldBody class="flex flex-col">
+                                    <Addons>
+                                        <Addon AddonType="AddonType.Start">
+                                            <Tooltip Text="The email address of the caller">
+                                                <AddonLabel>Email</AddonLabel>
+                                            </Tooltip>
+                                        </Addon>
+                                        <Addon AddonType="AddonType.Body">
+                                            <InputMask
+                                                @bind-Text="ticketModel.Email"
+                                                Alias="email"
+                                            />
+                                        </Addon>
+                                    </Addons>
+                                    <Feedback>
+                                        <ValidationSuccess>Email is valid</ValidationSuccess>
+                                        <ValidationError>Must be a valid email address</ValidationError>
+                                    </Feedback>
+                                </FieldBody>
+                            </Field>
                         </Validation>
                     </Column>
                     <Column ColumnSize="ColumnSize.IsThird">
@@ -124,7 +124,7 @@
                         </Validation>
                     </Column>
                     <Column ColumnSize="ColumnSize.IsThird">
-                        <Validation Validator="ValidationRule.IsNotEmpty">
+                        <Validation Validator="ValidateCategory">
                             <Field>
                                 <FieldBody class="flex flex-col">
                                     <Addons>
@@ -135,13 +135,18 @@
                                         </Addon>
                                         <Addon AddonType="AddonType.Body">
                                             <Select
-                                                TValue="CategoryModel"
-                                                SelectedValue="@selectedCategory"
-                                                SelectedValueChanged="OnCategoryChanged"
+                                                TValue="Guid"
+                                                SelectedValue="@selectedCategoryId"
+                                                SelectedValueChanged="@OnCategoryChanged"
                                             >
                                                 @foreach (var category in categories)
                                                 {
-                                                    <SelectItem Value="@category">@category.Name</SelectItem>
+                                                    <SelectItem
+                                                        TValue="Guid"
+                                                        Value="@category.Id"
+                                                    >
+                                                        @category.Name
+                                                    </SelectItem>
                                                 }
                                             </Select>
                                         </Addon>
@@ -153,7 +158,7 @@
                                 </FieldBody>
                             </Field>
                         </Validation>
-                        <Validation Validator="ValidationRule.IsNotEmpty">
+                        <Validation Validator="ValidateSubCategory">
                             <Field>
                                 <FieldBody class="flex flex-col">
                                     <Addons>
@@ -165,12 +170,16 @@
                                         <Addon AddonType="AddonType.Body">
                                             <Select
                                                 TValue="SubCategoryModel"
-                                                SelectedValue="@selectedSubCategory"
-                                                SelectedValueChanged="OnSubCategoryChanged"
+                                                @bind-SelectedValue="@ticketModel.SubCategory"
                                             >
                                                 @foreach (var subCategory in subCategories)
                                                 {
-                                                    <SelectItem Value="@subCategory">@subCategory.Name</SelectItem>
+                                                    <SelectItem
+                                                        TValue="SubCategoryModel"
+                                                        Value="@subCategory"
+                                                    >
+                                                        @subCategory.Name
+                                                    </SelectItem>
                                                 }
                                             </Select>
                                         </Addon>
@@ -184,7 +193,7 @@
                         </Validation>
                     </Column>
                     <Column ColumnSize="ColumnSize.IsThird">
-                        <Validation Validator="ValidationRule.IsNotEmpty">
+                        <Validation Validator="ValidateStatus">
                             <Field>
                                 <FieldBody class="flex flex-col">
                                     <Addons>
@@ -194,7 +203,20 @@
                                             </Tooltip>
                                         </Addon>
                                         <Addon AddonType="AddonType.Body">
-                                            <TextEdit @bind-Text="ticketModel.Status" />
+                                            <Select
+                                                TValue="StatusModel"
+                                                @bind-SelectedValue="@ticketModel.Status"
+                                            >
+                                                @foreach (var status in statuses)
+                                                {
+                                                    <SelectItem
+                                                        TValue="StatusModel"
+                                                        Value="@status"
+                                                    >
+                                                        @status.Name
+                                                    </SelectItem>
+                                                }
+                                            </Select>
                                         </Addon>
                                     </Addons>
                                     <Feedback>
@@ -204,7 +226,7 @@
                                 </FieldBody>
                             </Field>
                         </Validation>
-                        <Validation Validator="ValidationRule.IsNotEmpty">
+                        <Validation Validator="ValidatePriority">
                             <Field>
                                 <FieldBody class="flex flex-col">
                                     <Addons>
@@ -214,7 +236,20 @@
                                             </Tooltip>
                                         </Addon>
                                         <Addon AddonType="AddonType.Body">
-                                            <TextEdit @bind-Text="ticketModel.Priority" />
+                                            <Select
+                                                TValue="PriorityModel"
+                                                @bind-SelectedValue="@ticketModel.Priority"
+                                            >
+                                                @foreach (var priority in priorities)
+                                                {
+                                                    <SelectItem
+                                                        TValue="PriorityModel"
+                                                        Value="@priority"
+                                                    >
+                                                        @priority.Name
+                                                    </SelectItem>
+                                                }
+                                            </Select>
                                         </Addon>
                                     </Addons>
                                     <Feedback>
@@ -226,7 +261,7 @@
                         </Validation>
                     </Column>
                     <Column ColumnSize="ColumnSize.Is8">
-                        <Validation Validator="ValidationRule.IsNotEmpty">
+                        <Validation Validator="ValidateAssignedTo">
                             <Field>
                                 <FieldBody class="flex flex-col">
                                     <Addons>
@@ -236,7 +271,20 @@
                                             </Tooltip>
                                         </Addon>
                                         <Addon AddonType="AddonType.Body">
-                                            <TextEdit @bind-Text="ticketModel.AssignedTo" />
+                                            <Select
+                                                TValue="UserModel"
+                                                @bind-SelectedValue="@ticketModel.AssignedTo"
+                                            >
+                                                @foreach (var user in users)
+                                                {
+                                                    <SelectItem
+                                                        TValue="UserModel"
+                                                        Value="@user"
+                                                    >
+                                                        @user.Name
+                                                    </SelectItem>
+                                                }
+                                            </Select>
                                         </Addon>
                                     </Addons>
                                     <Feedback>
@@ -323,9 +371,9 @@
         private List<BranchModel> branches = new List<BranchModel>();
         private BranchModel selectedBranch;
         private List<CategoryModel> categories = new List<CategoryModel>();
-        private CategoryModel selectedCategory;
+        private Guid selectedCategoryId;
         private List<SubCategoryModel> subCategories = new List<SubCategoryModel>();
-        private SubCategoryModel selectedSubCategory;
+        private Guid selectedSubCategoryId;
         private List<StatusModel> statuses = new List<StatusModel>();
         private StatusModel selectedStatus;
         private List<PriorityModel> priorities = new List<PriorityModel>();
@@ -352,17 +400,17 @@
 
             await LoadDataAsync();
 
-            selectedCategory = categories.FirstOrDefault();
-            ticketModel.Category = categories.FirstOrDefault();
+            selectedCategoryId = categories.FirstOrDefault().Id;
+            ticketModel.Category = categories.Find(c => c.Id == selectedCategoryId);
 
-            selectedSubCategory = subCategories.FirstOrDefault();
-            ticketModel.SubCategory = subCategories.FirstOrDefault();
+            selectedSubCategoryId = subCategories.FirstOrDefault().Id;
+            ticketModel.SubCategory = subCategories.Find(sc => sc.Id == selectedSubCategoryId);
 
             if (currentUser != null)
             {
-                ticketModel.CreatedBy = currentUser.Id;
-                ticketModel.UpdatedBy = currentUser.Id;
-                ticketModel.AssignedTo = currentUser.Id;
+                ticketModel.CreatedBy = currentUser;
+                ticketModel.UpdatedBy = currentUser;
+                ticketModel.AssignedTo = currentUser;
             }
 
             isInitialized = true;
@@ -399,21 +447,71 @@
             e.Status = string.IsNullOrEmpty(email) ? ValidationStatus.None :
                 email.Contains("@") ? ValidationStatus.Success : ValidationStatus.Error;
         }
+
+        void ValidateCategory(ValidatorEventArgs e)
+        {
+            var categoryId = (Guid)e.Value;
+
+            e.Status = categoryId == Guid.Empty ? ValidationStatus.Error : ValidationStatus.Success;
+        }
+
+        void ValidateSubCategory(ValidatorEventArgs e)
+        {
+            var subCategory = e.Value as SubCategoryModel;
+
+            e.Status = subCategory == null ? ValidationStatus.Error : ValidationStatus.Success;
+        }
+
+        void ValidateStatus(ValidatorEventArgs e)
+        {
+            var status = e.Value as StatusModel;
+
+            e.Status = status == null ? ValidationStatus.Error : ValidationStatus.Success;
+        }
+
+        void ValidatePriority(ValidatorEventArgs e)
+        {
+            var priority = e.Value as PriorityModel;
+
+            e.Status = priority == null ? ValidationStatus.Error : ValidationStatus.Success;
+        }
+
+        void ValidateAssignedTo(ValidatorEventArgs e)
+        {
+            var assignedTo = e.Value as UserModel;
+
+            e.Status = assignedTo == null ? ValidationStatus.Error : ValidationStatus.Success;
+        }
+
+        void ValidateDescription(ValidatorEventArgs e)
+        {
+            var description = Convert.ToString(e.Value);
+
+            e.Status = string.IsNullOrEmpty(description) ? ValidationStatus.Error : ValidationStatus.Success;
+        }
     #endregion
 
-    #region Component Form Event Handlers
-        private async Task OnCategoryChanged(CategoryModel category)
+        private async Task OnCategoryChanged(Guid categoryId)
         {
-            selectedCategory = category;
-            ticketModel.Category = category;
-            subCategories = await SubCategoryModel.GetByCategoryAsync(DbContextFactory.CreateDbContext(), category.Id);
-            ticketModel.SubCategory = subCategories.FirstOrDefault();
+
+            selectedCategoryId = categoryId;
+            if (selectedCategoryId != Guid.Empty)
+            {
+                await using var context = DbContextFactory.CreateDbContext();
+                subCategories = await SubCategoryModel.GetByCategoryAsync(context, selectedCategoryId);
+                selectedSubCategoryId = subCategories.FirstOrDefault().Id;
+            }
+            else
+            {
+                subCategories = new List<SubCategoryModel>();
+                selectedSubCategoryId = Guid.Empty;
+            }
+
+            ticketModel.Category = categories.Find(c => c.Id == selectedCategoryId);
+            ticketModel.SubCategory = subCategories.Find(sc => sc.Id == selectedSubCategoryId);
+            StateHasChanged();
         }
-        private async Task OnSubCategoryChanged(SubCategoryModel subCategory)
-        {
-            selectedSubCategory = subCategory;
-            ticketModel.SubCategory = subCategory;
-        }
+
         private async Task OnDescriptionChanged()
         {
             contentAsText = await DescriptionRef.GetTextAsync();
@@ -436,7 +534,6 @@
                 await MessageService.Error("Description cannot be empty.");
             }
         }
-    #endregion
 
     #region Component Utility Methods
         private string GetDescriptionClass()
