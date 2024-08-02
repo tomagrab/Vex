@@ -80,76 +80,67 @@
                         </Validation>
                     </Column>
                     <Column ColumnSize="ColumnSize.IsThird">
-                        <Validation Validator="ValidateCompany">
+                        <Field>
+                            <FieldBody class="flex flex-col">
+                                <Addons>
+                                    <Addon AddonType="AddonType.Start">
+                                        <Tooltip Text="The company of the caller">
+                                            <AddonLabel>Company</AddonLabel>
+                                        </Tooltip>
+                                    </Addon>
+                                    <Addon AddonType="AddonType.Body">
+                                            <Autocomplete
+                                                TItem="CompanyModel"
+                                                TValue="CompanyModel"
+                                                Data="@ReadDataCompanies"
+                                                ReadData="@OnHandleReadDataCompanies"
+                                                TextField="@((company) => company.Name)"
+                                                ValueField="@((company) => company)"
+                                                SelectedValue="@selectedCompany"
+                                                SelectedValueChanged="@OnHandleCompanyChanged"
+                                                HighlightSearch
+                                                FreeTyping
+                                                AutoSelectFirstItem="true"
+                                                Validator="ValidateCompany"
+                                            >
+                                                <NotFoundContent>Sorry... @context was not found! :(</NotFoundContent>
+                                            </Autocomplete>
+                                    </Addon>
+                                </Addons>
+                            </FieldBody>
+                        </Field>
+                        @* Only show branch autocomplete if Companies have been populated and set *@
+                        @if (selectedCompany != null && selectedCompany.Id != Guid.Empty && selectedCompany.Name != String.Empty)
+                        {
                             <Field>
                                 <FieldBody class="flex flex-col">
                                     <Addons>
                                         <Addon AddonType="AddonType.Start">
-                                            <Tooltip Text="The company of the caller">
-                                                <AddonLabel>Company</AddonLabel>
+                                            <Tooltip Text="The branch of the caller">
+                                                <AddonLabel>Branch</AddonLabel>
                                             </Tooltip>
                                         </Addon>
                                         <Addon AddonType="AddonType.Body">
-                                                <Autocomplete
-                                                    TItem="CompanyModel"
-                                                    TValue="CompanyModel"
-                                                    Data="@ReadDataCompanies"
-                                                    ReadData="@OnHandleReadDataCompanies"
-                                                    TextField="@((company) => company.Name)"
-                                                    ValueField="@((company) => company)"
-                                                    SelectedValue="@selectedCompany"
-                                                    SelectedValueChanged="@OnHandleCompanyChanged"
+                                            <Autocomplete
+                                                    TItem="BranchModel"
+                                                    TValue="BranchModel"
+                                                    Data="@ReadDataBranches"
+                                                    ReadData="@OnHandleReadDataBranches"
+                                                    TextField="@((branch) => branch.Name)"
+                                                    ValueField="@((branch) => branch)"
+                                                    SelectedValue="@selectedBranch"
+                                                    SelectedValueChanged="@OnHandleBranchChanged"
                                                     HighlightSearch
                                                     FreeTyping
                                                     AutoSelectFirstItem="true"
+                                                    Validator="ValidateBranch"
                                                 >
                                                     <NotFoundContent>Sorry... @context was not found! :(</NotFoundContent>
                                                 </Autocomplete>
                                         </Addon>
                                     </Addons>
-                                    <Feedback>
-                                        <ValidationSuccess>Company is valid</ValidationSuccess>
-                                        <ValidationError>Company cannot be empty</ValidationError>
-                                    </Feedback>
                                 </FieldBody>
                             </Field>
-                        </Validation>
-                        @* Only show branch autocomplete if Companies have been populated and set *@
-                        @if (selectedCompany != null && selectedCompany.Id != Guid.Empty && selectedCompany.Name != String.Empty)
-                        {
-                            <Validation Validator="ValidateBranch">
-                                <Field>
-                                    <FieldBody class="flex flex-col">
-                                        <Addons>
-                                            <Addon AddonType="AddonType.Start">
-                                                <Tooltip Text="The branch of the caller">
-                                                    <AddonLabel>Branch</AddonLabel>
-                                                </Tooltip>
-                                            </Addon>
-                                            <Addon AddonType="AddonType.Body">
-                                                <Autocomplete
-                                                        TItem="BranchModel"
-                                                        TValue="BranchModel"
-                                                        Data="@ReadDataBranches"
-                                                        ReadData="@OnHandleReadDataBranches"
-                                                        TextField="@((branch) => branch.Name)"
-                                                        ValueField="@((branch) => branch)"
-                                                        SelectedValue="@selectedBranch"
-                                                        SelectedValueChanged="@OnHandleBranchChanged"
-                                                        HighlightSearch
-                                                        FreeTyping
-                                                    >
-                                                        <NotFoundContent>Sorry... @context was not found! :(</NotFoundContent>
-                                                    </Autocomplete>
-                                            </Addon>
-                                        </Addons>
-                                    </FieldBody>
-                                    <Feedback>
-                                        <ValidationSuccess>Branch is valid</ValidationSuccess>
-                                        <ValidationError>Branch cannot be empty</ValidationError>
-                                    </Feedback>
-                                </Field>
-                            </Validation>
                         }
                     </Column>
                     <Column ColumnSize="ColumnSize.IsThird">
@@ -290,39 +281,35 @@
                         </Validation>
                     </Column>
                     <Column ColumnSize="ColumnSize.Is8">
-                        <Validation Validator="ValidateAssignedTo">
-                            <Field>
-                                <FieldBody class="flex flex-col">
-                                    <Addons>
-                                        <Addon AddonType="AddonType.Start">
-                                            <Tooltip Text="The person assigned to this ticket">
-                                                <AddonLabel>Assigned To</AddonLabel>
-                                            </Tooltip>
-                                        </Addon>
-                                        <Addon AddonType="AddonType.Body">
-                                            <Select
-                                                TValue="UserModel"
-                                                @bind-SelectedValue="@ticketModel.AssignedTo"
-                                            >
-                                                @foreach (var user in users)
-                                                {
-                                                    <SelectItem
-                                                        TValue="UserModel"
-                                                        Value="@user"
-                                                    >
-                                                        @user.Name
-                                                    </SelectItem>
-                                                }
-                                            </Select>
-                                        </Addon>
-                                    </Addons>
-                                    <Feedback>
-                                        <ValidationSuccess>Assigned To is valid</ValidationSuccess>
-                                        <ValidationError>Assigned To cannot be empty</ValidationError>
-                                    </Feedback>
-                                </FieldBody>
-                            </Field>
-                        </Validation>
+                        <Field>
+                            <FieldBody class="flex flex-col">
+                                <Addons>
+                                    <Addon AddonType="AddonType.Start">
+                                        <Tooltip Text="The person assigned to this ticket">
+                                            <AddonLabel>Assigned To</AddonLabel>
+                                        </Tooltip>
+                                    </Addon>
+                                    <Addon AddonType="AddonType.Body">
+                                        <Autocomplete
+                                            TItem="UserModel"
+                                            TValue="UserModel"
+                                            Data="@ReadDataUsers"
+                                            ReadData="@OnHandleReadDataUsers"
+                                            TextField="@((user) => user.Name)"
+                                            ValueField="@((user) => user)"
+                                            SelectedValue="@assignedToUser"
+                                            SelectedValueChanged="@OnHandleUserChanged"
+                                            HighlightSearch
+                                            FreeTyping
+                                            AutoSelectFirstItem="true"
+                                            Validator="ValidateAssignedTo"
+                                        >
+                                            <NotFoundContent>Sorry... @context was not found! :(</NotFoundContent>
+                                        </Autocomplete>
+                                    </Addon>
+                                </Addons>
+                            </FieldBody>
+                        </Field>
                     </Column>
                     <Column ColumnSize="ColumnSize.IsFull">
                         <Field>
@@ -421,6 +408,7 @@
         private List<PriorityModel> priorities = new List<PriorityModel>();
         private Guid selectedPriorityId;
         private List<UserModel> users = new List<UserModel>();
+        private List<UserModel> ReadDataUsers = new List<UserModel>();
         private UserModel assignedToUser;
         private UserModel currentUser;
         private bool readOnly;
@@ -446,6 +434,7 @@
                 ticketModel.CreatedBy = currentUser;
                 ticketModel.UpdatedBy = currentUser;
                 ticketModel.AssignedTo = currentUser;
+                assignedToUser = currentUser;
             }
 
             await LoadDataAsync();
@@ -511,16 +500,28 @@
 
         void ValidateCompany(ValidatorEventArgs e)
         {
-            var company = e.Value as CompanyModel;
+            var companyName = Convert.ToString(e.Value);
 
-            e.Status = company == null ? ValidationStatus.Error : ValidationStatus.Success;
+            e.Status = string.IsNullOrEmpty(companyName) ? ValidationStatus.Error : ValidationStatus.Success;
+
+            if (e.Status == ValidationStatus.Success)
+            {
+                var company = companies.FirstOrDefault(c => c.Name == companyName);
+                e.Status = company == null ? ValidationStatus.Error : ValidationStatus.Success;
+            }
         }
 
         void ValidateBranch(ValidatorEventArgs e)
         {
-            var branch = e.Value as BranchModel;
+            var branchName = Convert.ToString(e.Value);
 
-            e.Status = branch == null ? ValidationStatus.Error : ValidationStatus.Success;
+            e.Status = string.IsNullOrEmpty(branchName) ? ValidationStatus.Error : ValidationStatus.Success;
+
+            if (e.Status == ValidationStatus.Success)
+            {
+                var branch = branches.FirstOrDefault(b => b.Name == branchName);
+                e.Status = branch == null ? ValidationStatus.Error : ValidationStatus.Success;
+            }
         }
 
         void ValidateCategory(ValidatorEventArgs e)
@@ -553,9 +554,15 @@
 
         void ValidateAssignedTo(ValidatorEventArgs e)
         {
-            var assignedTo = e.Value as UserModel;
+            var assignedTo = Convert.ToString(e.Value);
 
-            e.Status = assignedTo == null ? ValidationStatus.Error : ValidationStatus.Success;
+            e.Status = string.IsNullOrEmpty(assignedTo) ? ValidationStatus.Error : ValidationStatus.Success;
+
+            if (e.Status == ValidationStatus.Success)
+            {
+                var user = users.FirstOrDefault(u => u.Name == assignedTo);
+                e.Status = user == null ? ValidationStatus.Error : ValidationStatus.Success;
+            }
         }
 
         void ValidateDescription(ValidatorEventArgs e)
@@ -639,6 +646,27 @@
             StateHasChanged();
         }
 
+        private async Task OnHandleReadDataUsers(AutocompleteReadDataEventArgs autocompleteReadDataEventArgs)
+        {
+            if (!autocompleteReadDataEventArgs.CancellationToken.IsCancellationRequested)
+            {
+                await Task.Delay(random.Next(100));
+                if (!autocompleteReadDataEventArgs.CancellationToken.IsCancellationRequested)
+                {
+                    ReadDataUsers = users
+                        .Where(u => u.Name.StartsWith(autocompleteReadDataEventArgs.SearchValue, StringComparison.InvariantCultureIgnoreCase))
+                        .ToList();
+                }
+            }
+        }
+
+        private async Task OnHandleUserChanged(UserModel user)
+        {
+            assignedToUser = user;
+            ticketModel.AssignedTo = assignedToUser;
+            StateHasChanged();
+        }
+
         private async Task OnDescriptionChanged()
         {
             contentAsText = await DescriptionRef.GetTextAsync();
@@ -655,6 +683,13 @@
 
                 await ValidationsRef.ClearAll();
                 showDescriptionError = false;
+
+                ticketModel.CreatedBy = currentUser;
+                ticketModel.UpdatedBy = currentUser;
+                ticketModel.AssignedTo = assignedToUser;
+
+                await using var context = DbContextFactory.CreateDbContext();
+                context.Tickets.Add(ticketModel);
             }
             else if (string.IsNullOrWhiteSpace(contentAsText))
             {
