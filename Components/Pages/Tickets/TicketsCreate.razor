@@ -1,6 +1,7 @@
 @page "/Tickets/Create"
 @attribute [Authorize(Roles = "Admin, Manager, User")]
 @rendermode InteractiveServer
+@using System.Text.Json;
 
 <PageTitle>Create Ticket | Vex</PageTitle>
 
@@ -35,7 +36,7 @@
                                 </FieldBody>
                             </Field>
                         </Validation>
-                        <Validation Validator="ValidationRule.IsNotEmpty">
+                        <Validation Validator="ValidatePhone">
                             <Field>
                                 <FieldBody class="flex flex-col">
                                     <Addons>
@@ -45,7 +46,7 @@
                                             </Tooltip>
                                         </Addon>
                                         <Addon AddonType="AddonType.Body">
-                                            <InputMask @bind-Text="ticketModel.Phone" Mask="(999) 999-9999" />
+                                            <InputMask @bind-Value="ticketModel.Phone" Mask="(999) 999-9999" />
                                         </Addon>
                                     </Addons>
                                     <Feedback>
@@ -66,7 +67,7 @@
                                         </Addon>
                                         <Addon AddonType="AddonType.Body">
                                             <InputMask
-                                                @bind-Text="ticketModel.Email"
+                                                @bind-Value="ticketModel.Email"
                                                 Alias="email"
                                             />
                                         </Addon>
@@ -375,51 +376,53 @@
 
 @code {
     #region Component Dependencies
-        [Inject] IMessageService MessageService { get; set; }
-        [Inject] IDbContextFactory<AppDbContext> DbContextFactory { get; set; }
-        [Inject] Auth0Service Auth0Service { get; set; }
+    [Inject] IMessageService MessageService { get; set; }
+    [Inject] IDbContextFactory<AppDbContext> DbContextFactory { get; set; }
+    [Inject] Auth0Service Auth0Service { get; set; }
     #endregion
 
     #region Component Fields
-        private Validations ValidationsRef { get; set; }
-        private RichTextEdit DescriptionRef { get; set; }
-        private TicketModel ticketModel { get; set; } = new TicketModel();
-        private List<CompanyModel> companies = new List<CompanyModel>();
-        private List<CompanyModel> ReadDataCompanies = new List<CompanyModel>();
-        private CompanyModel selectedCompany = new CompanyModel
-            {
-                Id = Guid.Empty,
-                Name = string.Empty
-            };
+    private Validations ValidationsRef { get; set; }
+    private RichTextEdit DescriptionRef { get; set; }
+    private TicketModel ticketModel { get; set; } = new TicketModel();
+    private List<CompanyModel> companies = new List<CompanyModel>();
+    private List<CompanyModel> ReadDataCompanies = new List<CompanyModel>();
+    private CompanyModel selectedCompany = new CompanyModel
+    {
+        Id = Guid.Empty,
+        Name = string.Empty
+    };
 
-        private List<BranchModel> branches = new List<BranchModel>();
-        private List<BranchModel> ReadDataBranches = new List<BranchModel>();
-        private BranchModel selectedBranch = new BranchModel
-            {
-                Id = Guid.Empty,
-                Name = string.Empty
-            };
-        private List<CategoryModel> categories = new List<CategoryModel>();
-        private Guid selectedCategoryId;
-        private List<SubCategoryModel> subCategories = new List<SubCategoryModel>();
-        private Guid selectedSubCategoryId;
-        private List<StatusModel> statuses = new List<StatusModel>();
-        private Guid selectedStatusId;
-        private List<PriorityModel> priorities = new List<PriorityModel>();
-        private Guid selectedPriorityId;
-        private List<UserModel> users = new List<UserModel>();
-        private List<UserModel> ReadDataUsers = new List<UserModel>();
-        private UserModel assignedToUser;
-        private UserModel currentUser;
-        private bool readOnly;
-        private string contentAsText;
-        private bool showDescriptionError;
-        private bool isInitialized;
-        private Random random = new Random();
+    private List<BranchModel> branches = new List<BranchModel>();
+    private List<BranchModel> ReadDataBranches = new List<BranchModel>();
+    private BranchModel selectedBranch = new BranchModel
+    {
+        Id = Guid.Empty,
+        Name = string.Empty
+    };
+    private List<CategoryModel> categories = new List<CategoryModel>();
+    private Guid selectedCategoryId;
+    private List<SubCategoryModel> subCategories = new List<SubCategoryModel>();
+    private Guid selectedSubCategoryId;
+    private List<StatusModel> statuses = new List<StatusModel>();
+    private Guid selectedStatusId;
+    private List<PriorityModel> priorities = new List<PriorityModel>();
+    private Guid selectedPriorityId;
+    private List<UserModel> users = new List<UserModel>();
+    private List<UserModel> ReadDataUsers = new List<UserModel>();
+    private UserModel assignedToUser;
+    private UserModel currentUser;
+    private bool readOnly;
+    private string contentAsText;
+    private bool showDescriptionError;
+    private bool isInitialized;
+    private Random random = new Random();
     #endregion
 
     #region Component Initialization
-        protected override async Task OnInitializedAsync()
+    protected override async Task OnInitializedAsync()
+    {
+        try
         {
             currentUser = await Auth0Service.GetUserModelAsync();
             users = await Auth0Service.GetUsersAsync();
@@ -442,8 +445,15 @@
 
             await base.OnInitializedAsync();
         }
+        catch (Exception ex)
+        {
+            await MessageService.Error($"An error occurred during initialization: {ex.Message}");
+        }
+    }
 
-        protected override async Task OnAfterRenderAsync(bool firstRender)
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        try
         {
             if (firstRender && isInitialized)
             {
@@ -451,10 +461,17 @@
                 await InvokeAsync(StateHasChanged);
             }
         }
+        catch (Exception ex)
+        {
+            await MessageService.Error($"An error occurred during rendering: {ex.Message}");
+        }
+    }
     #endregion
 
     #region Data Initialization
-        private async Task LoadDataAsync()
+    private async Task LoadDataAsync()
+    {
+        try
         {
             await using var context = DbContextFactory.CreateDbContext();
 
@@ -487,94 +504,98 @@
             selectedPriorityId = priorities.FirstOrDefault()?.Id ?? Guid.Empty;
             ticketModel.Priority = priorities.FirstOrDefault(priority => priority.Id == selectedPriorityId);
         }
+        catch (Exception ex)
+        {
+            await MessageService.Error($"An error occurred while loading data: {ex.Message}");
+        }
+    }
     #endregion
 
     #region Component Validation Methods
-        void ValidateEmail(ValidatorEventArgs e)
+    void ValidatePhone(ValidatorEventArgs e)
+    {
+        var phone = Convert.ToString(e.Value);
+        e.Status = string.IsNullOrEmpty(phone) ? ValidationStatus.Error : ValidationStatus.Success;
+    }
+
+    void ValidateEmail(ValidatorEventArgs e)
+    {
+        var email = Convert.ToString(e.Value);
+        e.Status = string.IsNullOrEmpty(email) ? ValidationStatus.None :
+            email.Contains("@") ? ValidationStatus.Success : ValidationStatus.Error;
+    }
+
+    void ValidateCompany(ValidatorEventArgs e)
+    {
+        var companyName = Convert.ToString(e.Value);
+        e.Status = string.IsNullOrEmpty(companyName) ? ValidationStatus.Error : ValidationStatus.Success;
+
+        if (e.Status == ValidationStatus.Success)
         {
-            var email = Convert.ToString(e.Value);
-
-            e.Status = string.IsNullOrEmpty(email) ? ValidationStatus.None :
-                email.Contains("@") ? ValidationStatus.Success : ValidationStatus.Error;
+            var company = companies.FirstOrDefault(c => c.Name == companyName);
+            e.Status = company == null ? ValidationStatus.Error : ValidationStatus.Success;
         }
+    }
 
-        void ValidateCompany(ValidatorEventArgs e)
+    void ValidateBranch(ValidatorEventArgs e)
+    {
+        var branchName = Convert.ToString(e.Value);
+        e.Status = string.IsNullOrEmpty(branchName) ? ValidationStatus.Error : ValidationStatus.Success;
+
+        if (e.Status == ValidationStatus.Success)
         {
-            var companyName = Convert.ToString(e.Value);
-
-            e.Status = string.IsNullOrEmpty(companyName) ? ValidationStatus.Error : ValidationStatus.Success;
-
-            if (e.Status == ValidationStatus.Success)
-            {
-                var company = companies.FirstOrDefault(c => c.Name == companyName);
-                e.Status = company == null ? ValidationStatus.Error : ValidationStatus.Success;
-            }
+            var branch = branches.FirstOrDefault(b => b.Name == branchName);
+            e.Status = branch == null ? ValidationStatus.Error : ValidationStatus.Success;
         }
+    }
 
-        void ValidateBranch(ValidatorEventArgs e)
+    void ValidateCategory(ValidatorEventArgs e)
+    {
+        var categoryId = (Guid)e.Value;
+        e.Status = categoryId == Guid.Empty ? ValidationStatus.Error : ValidationStatus.Success;
+    }
+
+    void ValidateSubCategory(ValidatorEventArgs e)
+    {
+        var subCategory = e.Value as SubCategoryModel;
+        e.Status = subCategory == null ? ValidationStatus.Error : ValidationStatus.Success;
+    }
+
+    void ValidateStatus(ValidatorEventArgs e)
+    {
+        var status = e.Value as StatusModel;
+        e.Status = status == null ? ValidationStatus.Error : ValidationStatus.Success;
+    }
+
+    void ValidatePriority(ValidatorEventArgs e)
+    {
+        var priority = e.Value as PriorityModel;
+        e.Status = priority == null ? ValidationStatus.Error : ValidationStatus.Success;
+    }
+
+    void ValidateAssignedTo(ValidatorEventArgs e)
+    {
+        var assignedTo = Convert.ToString(e.Value);
+        e.Status = string.IsNullOrEmpty(assignedTo) ? ValidationStatus.Error : ValidationStatus.Success;
+
+        if (e.Status == ValidationStatus.Success)
         {
-            var branchName = Convert.ToString(e.Value);
-
-            e.Status = string.IsNullOrEmpty(branchName) ? ValidationStatus.Error : ValidationStatus.Success;
-
-            if (e.Status == ValidationStatus.Success)
-            {
-                var branch = branches.FirstOrDefault(b => b.Name == branchName);
-                e.Status = branch == null ? ValidationStatus.Error : ValidationStatus.Success;
-            }
+            var user = users.FirstOrDefault(u => u.Name == assignedTo);
+            e.Status = user == null ? ValidationStatus.Error : ValidationStatus.Success;
         }
+    }
 
-        void ValidateCategory(ValidatorEventArgs e)
-        {
-            var categoryId = (Guid)e.Value;
-
-            e.Status = categoryId == Guid.Empty ? ValidationStatus.Error : ValidationStatus.Success;
-        }
-
-        void ValidateSubCategory(ValidatorEventArgs e)
-        {
-            var subCategory = e.Value as SubCategoryModel;
-
-            e.Status = subCategory == null ? ValidationStatus.Error : ValidationStatus.Success;
-        }
-
-        void ValidateStatus(ValidatorEventArgs e)
-        {
-            var status = e.Value as StatusModel;
-
-            e.Status = status == null ? ValidationStatus.Error : ValidationStatus.Success;
-        }
-
-        void ValidatePriority(ValidatorEventArgs e)
-        {
-            var priority = e.Value as PriorityModel;
-
-            e.Status = priority == null ? ValidationStatus.Error : ValidationStatus.Success;
-        }
-
-        void ValidateAssignedTo(ValidatorEventArgs e)
-        {
-            var assignedTo = Convert.ToString(e.Value);
-
-            e.Status = string.IsNullOrEmpty(assignedTo) ? ValidationStatus.Error : ValidationStatus.Success;
-
-            if (e.Status == ValidationStatus.Success)
-            {
-                var user = users.FirstOrDefault(u => u.Name == assignedTo);
-                e.Status = user == null ? ValidationStatus.Error : ValidationStatus.Success;
-            }
-        }
-
-        void ValidateDescription(ValidatorEventArgs e)
-        {
-            var description = Convert.ToString(e.Value);
-
-            e.Status = string.IsNullOrEmpty(description) ? ValidationStatus.Error : ValidationStatus.Success;
-        }
+    void ValidateDescription(ValidatorEventArgs e)
+    {
+        var description = Convert.ToString(e.Value);
+        e.Status = string.IsNullOrEmpty(description) ? ValidationStatus.Error : ValidationStatus.Success;
+    }
     #endregion
 
     #region Component Event Handlers
-        private async Task OnHandleReadDataCompanies(AutocompleteReadDataEventArgs autocompleteReadDataEventArgs)
+    private async Task OnHandleReadDataCompanies(AutocompleteReadDataEventArgs autocompleteReadDataEventArgs)
+    {
+        try
         {
             if (!autocompleteReadDataEventArgs.CancellationToken.IsCancellationRequested)
             {
@@ -587,8 +608,15 @@
                 }
             }
         }
+        catch (Exception ex)
+        {
+            await MessageService.Error($"An error occurred while reading companies: {ex.Message}");
+        }
+    }
 
-        private async Task OnHandleCompanyChanged(CompanyModel company)
+    private async Task OnHandleCompanyChanged(CompanyModel company)
+    {
+        try
         {
             if (company != null)
             {
@@ -603,8 +631,15 @@
                 StateHasChanged();
             }
         }
+        catch (Exception ex)
+        {
+            await MessageService.Error($"An error occurred while changing company: {ex.Message}");
+        }
+    }
 
-        private async Task OnHandleReadDataBranches(AutocompleteReadDataEventArgs autocompleteReadDataEventArgs)
+    private async Task OnHandleReadDataBranches(AutocompleteReadDataEventArgs autocompleteReadDataEventArgs)
+    {
+        try
         {
             if (!autocompleteReadDataEventArgs.CancellationToken.IsCancellationRequested)
             {
@@ -617,17 +652,30 @@
                 }
             }
         }
+        catch (Exception ex)
+        {
+            await MessageService.Error($"An error occurred while reading branches: {ex.Message}");
+        }
+    }
 
-        private async Task OnHandleBranchChanged(BranchModel branch)
+    private async Task OnHandleBranchChanged(BranchModel branch)
+    {
+        try
         {
             selectedBranch = branch;
             ticketModel.Branch = branches.Find(b => b.Id == selectedBranch.Id);
             StateHasChanged();
         }
-
-        private async Task OnCategoryChanged(Guid categoryId)
+        catch (Exception ex)
         {
+            await MessageService.Error($"An error occurred while changing branch: {ex.Message}");
+        }
+    }
 
+    private async Task OnCategoryChanged(Guid categoryId)
+    {
+        try
+        {
             selectedCategoryId = categoryId;
             if (selectedCategoryId != Guid.Empty)
             {
@@ -645,8 +693,15 @@
             ticketModel.SubCategory = subCategories.Find(sc => sc.Id == selectedSubCategoryId);
             StateHasChanged();
         }
+        catch (Exception ex)
+        {
+            await MessageService.Error($"An error occurred while changing category: {ex.Message}");
+        }
+    }
 
-        private async Task OnHandleReadDataUsers(AutocompleteReadDataEventArgs autocompleteReadDataEventArgs)
+    private async Task OnHandleReadDataUsers(AutocompleteReadDataEventArgs autocompleteReadDataEventArgs)
+    {
+        try
         {
             if (!autocompleteReadDataEventArgs.CancellationToken.IsCancellationRequested)
             {
@@ -659,24 +714,45 @@
                 }
             }
         }
+        catch (Exception ex)
+        {
+            await MessageService.Error($"An error occurred while reading users: {ex.Message}");
+        }
+    }
 
-        private async Task OnHandleUserChanged(UserModel user)
+    private async Task OnHandleUserChanged(UserModel user)
+    {
+        try
         {
             assignedToUser = user;
             ticketModel.AssignedTo = assignedToUser;
             StateHasChanged();
         }
+        catch (Exception ex)
+        {
+            await MessageService.Error($"An error occurred while changing user: {ex.Message}");
+        }
+    }
 
-        private async Task OnDescriptionChanged()
+    private async Task OnDescriptionChanged()
+    {
+        try
         {
             contentAsText = await DescriptionRef.GetTextAsync();
             ticketModel.Description = await DescriptionRef.GetHtmlAsync();
         }
-
-        private async Task OnSaveClicked()
+        catch (Exception ex)
         {
-            showDescriptionError = true;
+            await MessageService.Error($"An error occurred while changing description: {ex.Message}");
+        }
+    }
 
+    private async Task OnSaveClicked()
+    {
+        showDescriptionError = true;
+
+        try
+        {
             if (await ValidationsRef.ValidateAll() && !string.IsNullOrWhiteSpace(contentAsText))
             {
                 await MessageService.Info("Thank you for filling the form.");
@@ -684,41 +760,55 @@
                 await ValidationsRef.ClearAll();
                 showDescriptionError = false;
 
-                ticketModel.CreatedBy = currentUser;
-                ticketModel.UpdatedBy = currentUser;
-                ticketModel.AssignedTo = assignedToUser;
-
                 await using var context = DbContextFactory.CreateDbContext();
+
+                // Ensure related entities are not re-inserted
+                ticketModel.CompanyId = selectedCompany.Id;
+                ticketModel.BranchId = selectedBranch.Id;
+                ticketModel.CategoryId = selectedCategoryId;
+                ticketModel.SubCategoryId = selectedSubCategoryId;
+                ticketModel.StatusId = selectedStatusId;
+                ticketModel.PriorityId = selectedPriorityId;
+                ticketModel.AssignedToId = assignedToUser.Id;
+                ticketModel.CreatedById = currentUser.Id;
+                ticketModel.UpdatedById = currentUser.Id;
+
                 context.Tickets.Add(ticketModel);
+                await context.SaveChangesAsync();
             }
             else if (string.IsNullOrWhiteSpace(contentAsText))
             {
                 await MessageService.Error("Description cannot be empty.");
             }
         }
+        catch (Exception ex)
+        {
+            await MessageService.Error($"An error occurred while saving the ticket: {ex.Message}");
+        }
+    }
     #endregion
 
     #region Component Utility Methods
-        private string GetDescriptionClass()
-        {
-            string baseClasses = "bg-gray-50 border border-gray-300 text-gray-900 rounded-r-lg focus:ring-primary-500 focus:border-primary-500 block w-full dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500 disabled:cursor-not-allowed disabled:opacity-75 p-2.5 text-sm text-white";
-            string errorClasses = "border border-red-500 text-red-900 placeholder-red-700 focus:ring-red-500 dark:text-red-500 dark:placeholder-red-500 dark:border-red-500";
+    private string GetDescriptionClass()
+    {
+        string baseClasses = "bg-gray-50 border border-gray-300 text-gray-900 rounded-r-lg focus:ring-primary-500 focus:border-primary-500 block w-full dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500 disabled:cursor-not-allowed disabled:opacity-75 p-2.5 text-sm text-white";
+        string errorClasses = "border border-red-500 text-red-900 placeholder-red-700 focus:ring-red-500 dark:text-red-500 dark:placeholder-red-500 dark:border-red-500";
 
-            return showDescriptionError && string.IsNullOrWhiteSpace(contentAsText) ? $"{baseClasses} {errorClasses}" : baseClasses;
-        }
+        return showDescriptionError && string.IsNullOrWhiteSpace(contentAsText) ? $"{baseClasses} {errorClasses}" : baseClasses;
+    }
     #endregion
 
     #region Component Tooltips
-        private string ContactTooltipText = "The name of the caller";
-        private string PhoneTooltipText = "The phone number of the caller";
-        private string EmailTooltipText = "The email address of the caller";
-        private string CompanyTooltipText = "The company of the caller";
-        private string BranchTooltipText = "The branch of the caller";
-        private string CategoryTooltipText = "The category of the ticket";
-        private string SubCategoryTooltipText = "The subcategory of the ticket";
-        private string StatusTooltipText = "The status of the ticket";
-        private string PriorityTooltipText = "The priority of the ticket";
-        private string AssignedToTooltipText = "The person assigned to this ticket";
-        private string DescriptionTooltipText = "The description of the issue";
+    private string ContactTooltipText = "The name of the caller";
+    private string PhoneTooltipText = "The phone number of the caller";
+    private string EmailTooltipText = "The email address of the caller";
+    private string CompanyTooltipText = "The company of the caller";
+    private string BranchTooltipText = "The branch of the caller";
+    private string CategoryTooltipText = "The category of the ticket";
+    private string SubCategoryTooltipText = "The subcategory of the ticket";
+    private string StatusTooltipText = "The status of the ticket";
+    private string PriorityTooltipText = "The priority of the ticket";
+    private string AssignedToTooltipText = "The person assigned to this ticket";
+    private string DescriptionTooltipText = "The description of the issue";
     #endregion
 }
